@@ -1,6 +1,8 @@
 import React from "react"
 import imgLogo from "./img/logo.svg"
-import 'boxicons'
+import { FaTelegram, FaGithub } from "react-icons/fa"
+import { SlSocialVkontakte } from "react-icons/sl";
+
 
 const Footer = () => {
   return (
@@ -12,13 +14,13 @@ const Footer = () => {
         </div>
         <div className="flex justify-center gap-x-4">
           <a href="https://github.com/Onizukachi">
-            <box-icon name='github' type='logo'></box-icon>
+            <FaGithub />
           </a>
           <a href="https://vk.com/onizukachi">
-            <box-icon name='vk' type='logo'></box-icon>
+            <SlSocialVkontakte />
           </a>
           <a href="https://t.me/onizukachi">
-            <box-icon type='logo' name='telegram'></box-icon>
+            <FaTelegram />
           </a>
         </div>
       </div>

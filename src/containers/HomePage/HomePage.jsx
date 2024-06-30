@@ -17,7 +17,7 @@ const HomePage = () => {
     <div className="flex flex-wrap gap-12 justify-between">
       { isSuccess && data['data'].map((el) => {
         return (
-          <div className="flex items-center">
+          <div key={el.id} className="flex items-center">
             <NavLink to="/">
               <img className={styles.logo} src={getPositionImageUrl(el.image_filename)} alt={el.title}></img>
             </NavLink>
