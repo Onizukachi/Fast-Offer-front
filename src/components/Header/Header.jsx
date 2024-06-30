@@ -1,5 +1,5 @@
 import { useState } from "react";
-import React from "react";
+import Auth from "@components/Header/Auth";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Navbar,
@@ -10,14 +10,13 @@ import {
   NavbarContent,
   NavbarItem,
   Link,
-  Button,
 } from "@nextui-org/react";
 import imgLogo from "./img/logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const currLocation = useLocation().pathname.split("/")[1];
 
+  const currLocation = useLocation().pathname.split("/")[1];
   const menuItems = ["Вопросы", "Собесы", "Избранное"];
 
   return (
@@ -96,17 +95,10 @@ const Header = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="/favorites">Войти</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="warning" href="/favorites" variant="flat">
-            Регистрация
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
+      {/* Login and Register section */}
+      <Auth />
 
+      {/* Burger Menu */}
       <NavbarMenu>
         {menuItems.map((item, index) => (
           <NavbarMenuItem key={`${item}-${index}`}>
