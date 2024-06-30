@@ -1,89 +1,52 @@
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
   useDisclosure,
-  Checkbox,
-  Input,
-  Link,
-  NavbarContent, NavbarItem
+  NavbarContent,
+  NavbarItem,
 } from "@nextui-org/react";
+import { MdAccountCircle } from "react-icons/md";
+import LoginModal from "@components/Header/Auth/LoginModal/index.js";
+import SignUpModal from "@components/Header/Auth/SignUpModal/index.js";
 
 const Auth = () => {
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const {
+    isOpen: loginModalIsOpen,
+    onOpen: loginModalOnOpen,
+    onOpenChange: loginModalOnOpenChange,
+  } = useDisclosure();
+  const {
+    isOpen: signUpIsOpen,
+    onOpen: signUpOnOpen,
+    onOpenChange: signUpOnOpenChange,
+  } = useDisclosure();
 
   return (
     <NavbarContent justify="end">
-      <NavbarItem className="flex">
-        <Link onClick={onOpen} href="/favorites">
-          Войти
-        </Link>
-      </NavbarItem>
       <NavbarItem>
-          <Button
-            onClick={onOpen}
-            color="warning"
-            href="/favorites"
-            variant="flat"
-          >
-            Регистрация
-          </Button>
+        <Button
+          onClick={loginModalOnOpen}
+          color="warning"
+          href="/favorites"
+          variant="flat"
+          size={"lg"}
+        >
+          <MdAccountCircle size={"1.6em"} />
+          Войти
+        </Button>
       </NavbarItem>
 
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        placement="auto"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">Войти</ModalHeader>
-              <ModalBody>
-                <Input
-                  autoFocus
-
-                  label="Email"
-                  placeholder="Введите ваш email"
-                  variant="bordered"
-                />
-                <Input
-
-                  label="Password"
-                  placeholder="Введите ваш пароль"
-                  type="password"
-                  variant="bordered"
-                />
-                <div className="flex py-2 px-1 justify-between">
-                  <Checkbox
-                    classNames={{
-                      label: "text-small",
-                    }}
-                  >
-                    Запомнить меня
-                  </Checkbox>
-                  <Link color="primary" href="#" size="sm">
-                    Забыли пароль?
-                  </Link>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="flat" onPress={onClose}>
-                  Закрыть
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Войти
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <LoginModal
+        isOpen={loginModalIsOpen}
+        onOpenChange={loginModalOnOpenChange}
+        signUpOnOpen={signUpOnOpen}
+      />
+      <SignUpModal
+        isOpen={signUpIsOpen}
+        onOpenChange={signUpOnOpenChange}
+        loginModalOnOpen={loginModalOnOpen}
+      />
     </NavbarContent>
-  )
-}
+  );
+};
 
 export default Auth;
