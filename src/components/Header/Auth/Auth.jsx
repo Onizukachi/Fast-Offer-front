@@ -5,10 +5,16 @@ import {
   NavbarItem,
 } from "@nextui-org/react";
 import { MdAccountCircle } from "react-icons/md";
+import { IoMdExit } from "react-icons/io";
 import LoginModal from "@components/Header/Auth/LoginModal/index.js";
 import SignUpModal from "@components/Header/Auth/SignUpModal/index.js";
+import AuthContext from "@context/AuthContext.jsx";
+import {useContext} from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Auth = () => {
+  const navigate = useNavigate();
   const {
     isOpen: loginModalIsOpen,
     onOpen: loginModalOnOpen,
@@ -19,20 +25,55 @@ const Auth = () => {
     onOpen: signUpOnOpen,
     onOpenChange: signUpOnOpenChange,
   } = useDisclosure();
+  const { user, setUser, setAuthToken } = useContext(AuthContext);
+
+  const successToast = () => {
+    toast.success("Вы вышли из системы!", {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+  };
+
+  const logoutUser = (e) => {
+    e.preventDefault();
+    setAuthToken(null)
+    setUser(null)
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('user')
+    navigate('/')
+    successToast();
+  }
 
   return (
     <NavbarContent justify="end">
       <NavbarItem>
-        <Button
-          onClick={loginModalOnOpen}
-          color="warning"
-          href="/favorites"
-          variant="flat"
-          size={"lg"}
-        >
-          <MdAccountCircle size={"1.6em"} />
-          Войти
-        </Button>
+        { user ? (
+          <Button
+            onClick={logoutUser}
+            color="warning"
+            variant="flat"
+            size={"lg"}
+          >
+            <IoMdExit size={"1.6em"} />
+            Выйти
+          </Button>
+        ) : (
+          <Button
+            onClick={loginModalOnOpen}
+            color="warning"
+            variant="flat"
+            size={"lg"}
+          >
+            <MdAccountCircle size={"1.6em"} />
+            Войти
+          </Button>
+        )}
       </NavbarItem>
 
       <LoginModal
