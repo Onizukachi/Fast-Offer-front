@@ -9,28 +9,29 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import PropTypes from "prop-types";
-import {useContext, useEffect, useState} from "react";
+import { useContext, useEffect, useState } from "react";
 import AuthContext from "@context/AuthContext.jsx";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import axios from "axios";
-import {API_BACK_BASE_URL} from "@constants/api.js";
+import { API_BACK_BASE_URL } from "@constants/api.js";
 import { useNavigate } from "react-router-dom";
 
 const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
   const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
-    passwordConfirmation: ""
+    password_confirmation: "",
   });
   const [errors, setErrors] = useState({});
   const { setUser, setAuthToken } = useContext(AuthContext);
 
   const onLogin = () => {
-    onOpenChange()
-    loginModalOnOpen()
-  }
+    onOpenChange();
+    loginModalOnOpen();
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -43,52 +44,16 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
 
   useEffect(() => {
     setErrors({});
+    setFormData({
+      username: "",
+      email: "",
+      password: "",
+      password_confirmation: "",
+    });
   }, [isOpen]);
 
-  const emailIsValid = () => {
-    if (formData.email === "") return false;
-
-    const EMAIL_REGEXP =
-      /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
-    return formData.email.match(EMAIL_REGEXP);
-  };
-
-  const passwordIsValid = () => {
-    return formData.password !== "" && formData.password.length >= 6;
-  };
-
-  const passwordConfirmationIsValid = () => {
-    return formData.passwordConfirmation === formData.password;
-  };
-
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {};
-
-    // Validate Email
-    if (!emailIsValid()) {
-      newErrors.email = "Введите корректный Email";
-      isValid = false;
-    }
-
-    // Validate password
-    if (!passwordIsValid()) {
-      newErrors.password = "Введите корректный пароль";
-      isValid = false;
-    }
-
-    // Validate password confirmation
-    if (!passwordConfirmationIsValid()) {
-      newErrors.passwordConfirmation = "Пароль подтверждения не совпадает с паролем";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
   const successToast = () => {
-    toast.success("Вы успешно зарегистрированы в системе!", {
+    toast.success("Добро пожаловать! Вы успешно зарегистрировались.", {
       position: "top-center",
       autoClose: 5000,
       hideProgressBar: false,
@@ -106,7 +71,8 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
         user: {
           email: formData.email,
           password: formData.password,
-          password_confirmation: formData.passwordConfirmation
+          password_confirmation: formData.passwordConfirmation,
+          username: formData.username,
         },
       })
       .then((response) => {
@@ -117,14 +83,14 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
         successToast();
       })
       .catch((error) => {
-        setErrors({ common: error.response.data.status.errors});
+        setErrors(error.response.data.status.errors);
       });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault;
 
-    if (validateForm()) signUpUser();
+    signUpUser();
   };
 
   return (
@@ -137,19 +103,34 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">Регистрация</ModalHeader>
+            <ModalHeader className="flex flex-col gap-1">
+              Регистрация
+            </ModalHeader>
             <ModalBody>
-              {errors.common && <p className="text-danger">{errors.common}</p>}
               <Input
                 autoFocus
+                label="Никнейм"
+                placeholder="Введите никнейм"
+                variant="bordered"
+                onChange={handleInputChange}
+                name="username"
+                isInvalid={!!errors.username}
+                color={errors.username ? "danger" : ""}
+                errorMessage={errors.username
+                  ?.map((error) => `Никнейм ${error}`)
+                  ?.join(". ")}
+              />
+              <Input
                 label="Email"
                 placeholder="Введите email"
                 variant="bordered"
                 onChange={handleInputChange}
                 name="email"
-                isInvalid={!!errors.email || !!errors.common}
-                color={errors.email || errors.common ? "danger" : ""}
-                errorMessage={errors.email}
+                isInvalid={!!errors.email}
+                color={errors.email ? "danger" : ""}
+                errorMessage={errors.email
+                  ?.map((error) => `Email ${error}`)
+                  ?.join(". ")}
               />
               <Input
                 label="Пароль"
@@ -158,9 +139,11 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
                 variant="bordered"
                 onChange={handleInputChange}
                 name="password"
-                isInvalid={!!errors.password || !!errors.common}
-                color={errors.password || errors.common ? "danger" : ""}
-                errorMessage={errors.password}
+                isInvalid={!!errors.password}
+                color={errors.password ? "danger" : ""}
+                errorMessage={errors.password
+                  ?.map((error) => `Пароль ${error}`)
+                  ?.join(". ")}
               />
               <Input
                 label="Подтверждение пароля"
@@ -169,9 +152,11 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
                 variant="bordered"
                 onChange={handleInputChange}
                 name="passwordConfirmation"
-                isInvalid={!!errors.passwordConfirmation || !!errors.common}
-                color={errors.passwordConfirmation || errors.common ? "danger" : ""}
-                errorMessage={errors.passwordConfirmation}
+                isInvalid={!!errors.password_confirmation}
+                color={errors.password_confirmation ? "danger" : ""}
+                errorMessage={errors.password_confirmation
+                  ?.map((error) => `Пароль подтверждения ${error}`)
+                  ?.join(". ")}
               />
               <div className="flex py-2 px-1 justify-between">
                 <Checkbox
@@ -201,7 +186,7 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
 SignUpModal.propTypes = {
   isOpen: PropTypes.bool,
   onOpenChange: PropTypes.func,
-  loginModalOnOpen: PropTypes.func
+  loginModalOnOpen: PropTypes.func,
 };
 
 export default SignUpModal;

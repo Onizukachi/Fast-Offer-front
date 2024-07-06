@@ -40,38 +40,6 @@ const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
     setErrors({});
   }, [isOpen]);
 
-  const emailIsValid = () => {
-    if (formData.email === "") return false;
-
-    const EMAIL_REGEXP =
-      /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
-    return formData.email.match(EMAIL_REGEXP);
-  };
-
-  const passwordIsValid = () => {
-    return formData.password !== "" && formData.password.length >= 6;
-  };
-
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {};
-
-    // Validate Email
-    if (!emailIsValid()) {
-      newErrors.email = "Введите корректный Email";
-      isValid = false;
-    }
-
-    // Validate password
-    if (!passwordIsValid()) {
-      newErrors.password = "Введите корректный пароль";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
   const successToast = () => {
     toast.success("Произведен вход в систему!", {
       position: "top-center",
@@ -109,7 +77,7 @@ const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
   const handleSubmit = (e) => {
     e.preventDefault;
 
-    if (validateForm()) loginUser();
+    loginUser();
   };
 
   const onRegister = () => {
