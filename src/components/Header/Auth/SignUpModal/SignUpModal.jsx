@@ -117,7 +117,6 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
         successToast();
       })
       .catch((error) => {
-        console.log(error.response.data.status.errors);
         setErrors({ common: error.response.data.status.errors});
       });
   };

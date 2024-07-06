@@ -8,8 +8,10 @@ import Footer from '@components/Footer'
 import styles from './App.module.css'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import moment from 'moment/min/moment-with-locales';
 
 function App() {
+  moment.locale('ru') // Устанавливаем глобально локаль для moment
   const navigate = useNavigate()
 
   return (
