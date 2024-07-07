@@ -41,7 +41,7 @@ const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
   }, [isOpen]);
 
   const successToast = () => {
-    toast.success("Произведен вход в систему!", {
+    toast.success("Вход в систему выполнен.", {
       position: "top-center",
       autoClose: 5000,
       hideProgressBar: false,

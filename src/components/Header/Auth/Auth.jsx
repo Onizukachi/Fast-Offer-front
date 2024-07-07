@@ -28,7 +28,7 @@ const Auth = () => {
   const { user, setUser, setAuthToken } = useContext(AuthContext);
 
   const successToast = () => {
-    toast.success("Вы вышли из системы!", {
+    toast.success("Выход из системы выполнен.", {
       position: "top-center",
       autoClose: 5000,
       hideProgressBar: false,
