@@ -5,10 +5,10 @@ export default AuthContext;
 
 export const AuthProvider = ({ children, ...props }) => {
   // eslint-disable-next-line no-unused-vars
-  const [user, _setUser] = useState(() => localStorage.getItem("user") || null);
+  const [user, _setUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null);
   // eslint-disable-next-line no-unused-vars
   const [authToken, _setAuthToken] = useState(
-    () => JSON.parse(localStorage.getItem("authToken")) || null,
+    () => localStorage.getItem("authToken") || null,
   );
 
   const setUser = (value) => {
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children, ...props }) => {
     _setUser(value)
   }
   const setAuthToken = (value) => {
-    localStorage.setItem('authToken', JSON.stringify(value));
+    localStorage.setItem('authToken', value);
     _setAuthToken(value)
   }
 

@@ -15,7 +15,8 @@ import AuthContext from "@context/AuthContext.jsx";
 import axios from "axios";
 import { API_BACK_BASE_URL } from "@constants/api.js";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { showToast } from "@utils/toast";
+import { SUCCESS_LOGIN } from "@constants/toastMessages";
 
 const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
   const navigate = useNavigate();
@@ -40,19 +41,6 @@ const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
     setErrors({});
   }, [isOpen]);
 
-  const successToast = () => {
-    toast.success("Вход в систему выполнен.", {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-  };
-
   const loginUser = async () => {
     axios
       .post(`${API_BACK_BASE_URL}/login`, {
@@ -66,7 +54,7 @@ const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
         setUser(response.data.user);
         onOpenChange();
         navigate("/");
-        successToast();
+        showToast(SUCCESS_LOGIN);
       })
       .catch((error) => {
         console.log(error.response.data);

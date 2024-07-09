@@ -11,7 +11,8 @@ import {
 import PropTypes from "prop-types";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "@context/AuthContext.jsx";
-import { toast } from "react-toastify";
+import { showToast } from "@utils/toast";
+import { SUCCESS_SIGN_UP } from "@constants/toastMessages";
 import axios from "axios";
 import { API_BACK_BASE_URL } from "@constants/api.js";
 import { useNavigate } from "react-router-dom";
@@ -52,19 +53,6 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
     });
   }, [isOpen]);
 
-  const successToast = () => {
-    toast.success("Добро пожаловать! Вы успешно зарегистрировались.", {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-  };
-
   const signUpUser = async () => {
     axios
       .post(`${API_BACK_BASE_URL}/signup`, {
@@ -80,7 +68,7 @@ const SignUpModal = ({ isOpen, onOpenChange, loginModalOnOpen }) => {
         setUser(response.data.user);
         onOpenChange();
         navigate("/");
-        successToast();
+        showToast(SUCCESS_SIGN_UP);
       })
       .catch((error) => {
         setErrors(error.response.data.status.errors);
