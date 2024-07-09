@@ -1,7 +1,8 @@
 import HomePage from '@containers/HomePage'
 import FavoritesPage from '@containers/FavoritesPage'
 import InterviewsPage from '@containers/InterviewsPage'
-import QuestionsPage from "@containers/QuestionsPage/index.js";
+import QuestionsPage from "@containers/QuestionsPage";
+import QuestionPage from "@containers/QuestionPage";
 
 const routesConfig = [
   {
@@ -13,6 +14,10 @@ const routesConfig = [
     element: QuestionsPage,
   },
   {
+    path: '/questions/:id',
+    element: QuestionPage,
+  },
+  {
     path: '/interviews',
     element: InterviewsPage,
   },
@@ -20,10 +25,6 @@ const routesConfig = [
     path: '/favorites',
     element: FavoritesPage,
   },
-  // {
-  //   path: '/people/:id',
-  //   element: PersonPage
-  // }
 ]
 
 export default routesConfig
