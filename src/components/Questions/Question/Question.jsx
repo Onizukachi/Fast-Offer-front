@@ -58,7 +58,8 @@ const Question = ({ question }) => {
             <LikeButton
               setLikeCount={setLikeCount}
               initState={question.liked}
-              entityId={question.id}
+              likeableId={question.id}
+              likeableType={'Question'}
             />
             <p className="ml-2">{new Intl.NumberFormat('ru', { notation: 'compact', maximumFractionDigits: 1 }).format(likeCount)}</p>
           </div>
