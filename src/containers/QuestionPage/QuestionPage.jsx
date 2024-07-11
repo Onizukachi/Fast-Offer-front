@@ -40,12 +40,14 @@ const QuestionPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
-  console.log(data);
-
   const createAnswerMutation = useMutation({
     mutationFn: () => createAnswerQuery(id, editorContent),
     onSuccess: (data) => {
-      console.log(data);
+      setQuestion({
+        ...question,
+        answers_count: question.answers_count + 1,
+        answers: [data['answer'], ...question.answers]
+      });
       resetAnswerEditor();
       showToast("Ответ успешно создан");
     },

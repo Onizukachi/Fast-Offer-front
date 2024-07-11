@@ -37,7 +37,7 @@ const Answer = ({ answer }) => {
         <div className="flex gap-5">
           <div className="flex">
             <BiSolidCommentDetail size="1.4em"/>
-            <p className="ml-2">{13}</p>
+            <p className="ml-2">{answer.comments.length}</p>
           </div>
           <div className="flex">
             <LikeButton

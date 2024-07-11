@@ -43,8 +43,7 @@ const Question = ({ question }) => {
           {question.body}
         </NavLink>
       </div>
-      <Divider className="mt-4 mb-1" />
-      <div className="flex justify-between gap-4 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
+      <div className="flex justify-between gap-4 mt-2 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
         <div className="flex gap-5">
           <div className="flex">
             <BiSolidCommentDetail size="1.4em" />
@@ -78,11 +77,11 @@ const Question = ({ question }) => {
         </div>
       </div>
       {question.tags?.length > 0 && (
-        <div className="flex flex-wrap gap-4 sm:gap-2 mt-2">
+        <div className="flex flex-wrap gap-4 sm:gap-2 mt-1">
           {question.tags.map((tag) => {
             return (
               <Chip key={tag.id} size="sm" className="cursor-pointer">
-                {tag.title}
+                {tag.name}
               </Chip>
             );
           })}
