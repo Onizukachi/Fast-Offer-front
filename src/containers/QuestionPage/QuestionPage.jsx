@@ -20,6 +20,7 @@ import { createAnswerQuery, updateAnswerQuery, deleteAnswerQuery } from "./queri
 import { showToast } from "@utils/toast";
 import { normalizeCountForm } from '@utils/normalizeCountForm'
 import Answer from "@components/Question/Answer"
+import {UNATHORIZED} from "@constants/toastMessages.js";
 
 const QuestionPage = () => {
   const { user } = useContext(AuthContext);
@@ -57,6 +58,11 @@ const QuestionPage = () => {
   });
 
   const handleSubmitAnswer = () => {
+    if (!user) {
+      showToast(UNATHORIZED, "warning");
+      return;
+    }
+
     createAnswerMutation.mutate();
   };
 
@@ -110,7 +116,7 @@ const QuestionPage = () => {
               <a className="hidden sm:flex items-center basis-28" href="#">
                 <img
                   className="ml-0 mr-4 sm:mx-4 w-12 h-12 object-cover rounded-full sm:block"
-                  src={gravatarUrl(user.gravatar_hash)}
+                  src={gravatarUrl(question.author.gravatar_hash)}
                   alt="avatar"
                 />
               </a>
