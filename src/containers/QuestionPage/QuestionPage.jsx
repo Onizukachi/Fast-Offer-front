@@ -1,13 +1,7 @@
-import {useMutation, useQuery} from "react-query";
-import {
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-  useRef
-} from "react";
+import { useMutation, useQuery } from "react-query";
+import { useContext, useEffect, useState, useMemo, useRef } from "react";
 import { fetchQuestion } from "./queries";
-import {Divider, Spinner} from "@nextui-org/react";
+import { Divider, Spinner } from "@nextui-org/react";
 import Question from "@components/Questions/Question";
 import { NavLink, useParams } from "react-router-dom";
 import AuthContext from "@context/AuthContext.jsx";
@@ -16,11 +10,16 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Button } from "@nextui-org/react";
 import { MdComment } from "react-icons/md";
-import { createAnswerQuery, updateAnswerQuery, deleteAnswerQuery } from "./queries";
+import {
+  createAnswerQuery,
+  updateAnswerQuery,
+  deleteAnswerQuery,
+} from "./queries";
 import { showToast } from "@utils/toast";
-import { normalizeCountForm } from '@utils/normalizeCountForm'
-import Answer from "@components/Question/Answer"
-import {UNATHORIZED} from "@constants/toastMessages.js";
+import { normalizeCountForm } from "@utils/normalizeCountForm";
+import Answer from "@components/Question/Answer";
+import { UNATHORIZED } from "@constants/toastMessages.js";
+import { deserialize } from "deserialize-json-api";
 
 const QuestionPage = () => {
   const { user } = useContext(AuthContext);
@@ -35,19 +34,23 @@ const QuestionPage = () => {
     setEditorPlainText("");
   };
 
-  const { data, isSuccess, isLoading } = useQuery(
+  const { isLoading } = useQuery(
     `question`,
-    () => fetchQuestion(id).then((data) => data),
+    () =>
+      fetchQuestion(id).then((data) => {
+        setQuestion(deserialize(data).data);
+      }),
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
   const createAnswerMutation = useMutation({
     mutationFn: () => createAnswerQuery(id, editorContent),
     onSuccess: (data) => {
+      const deserializedAnswer = deserialize(data).data;
       setQuestion({
         ...question,
         answers_count: question.answers_count + 1,
-        answers: [data['answer'], ...question.answers]
+        answers: [deserializedAnswer, ...question.answers],
       });
       resetAnswerEditor();
       showToast("Ответ успешно создан");
@@ -65,10 +68,6 @@ const QuestionPage = () => {
 
     createAnswerMutation.mutate();
   };
-
-  useEffect(() => {
-    if (isSuccess) setQuestion(data["question"]);
-  }, [data]);
 
   const handleEditorChange = (content, editor) => {
     setEditorPlainText(editor.getText());
@@ -136,7 +135,7 @@ const QuestionPage = () => {
               <Button
                 size="lg"
                 startContent={<MdComment size="1.4em" />}
-                className=" text-lg"
+                className="text-lg"
                 color="primary"
                 onClick={handleSubmitAnswer}
                 isDisabled={!validateAnswer()}
@@ -150,13 +149,12 @@ const QuestionPage = () => {
             </div>
           </div>
           <div className="px-8 py-4 rounded-lg shadow-md">
-            <h1 className="text-3xl ">{`${question["answers"].length} ${normalizeCountForm(question["answers"].length, ["ответ", "ответа", "ответов"])}`}</h1>
-            <div className='flex flex-col gap-6'>
-              {question["answers"]?.map((answer) => {
-                return <Answer key={answer.id} answer={answer} />
+            <h1 className="text-3xl ">{`${question.answers_count} ${normalizeCountForm(question.answers_count, ["ответ", "ответа", "ответов"])}`}</h1>
+            <div className="flex flex-col gap-6">
+              {question.answers.map((answer) => {
+                return <Answer key={answer.id} answer={answer} />;
               })}
             </div>
-
           </div>
         </>
       )}

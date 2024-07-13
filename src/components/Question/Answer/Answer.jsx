@@ -7,11 +7,11 @@ import LikeButton from "@components/Questions/LikeButton/index.js";
 import moment from "moment/min/moment-with-locales";
 
 const Answer = ({ answer }) => {
-  const [likeCount, setLikeCount] = useState(answer.like_count);
+  const [likesCount, setLikesCount] = useState(answer.likes_count);
 
   useEffect(() => {
-    setLikeCount(answer.like_count);
-  }, [answer.like_count]);
+    setLikesCount(answer.likes_count);
+  }, [answer.likes_count]);
 
   return (
     <div key={answer.id} className="mt-4 flex flex-col">
@@ -41,7 +41,7 @@ const Answer = ({ answer }) => {
           </div>
           <div className="flex">
             <LikeButton
-              setLikeCount={setLikeCount}
+              setLikesCount={setLikesCount}
               initState={answer.liked}
               likeableId={answer.id}
               likeableType={'Answer'}
@@ -49,7 +49,7 @@ const Answer = ({ answer }) => {
             <p className="ml-2">{new Intl.NumberFormat('ru', {
               notation: 'compact',
               maximumFractionDigits: 1
-            }).format(likeCount)}</p>
+            }).format(likesCount)}</p>
           </div>
         </div>
       </div>

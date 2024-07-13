@@ -6,7 +6,7 @@ import { useMutation } from "react-query";
 import PropTypes from "prop-types";
 import { likeQuery, unLikeQuery } from "./queries";
 
-const LikeButton = ({ likeableId, likeableType, setLikeCount, initState }) => {
+const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
   const { user } = useContext(AuthContext);
   const [isLiked, setIsLiked] = useState(initState);
 
@@ -18,7 +18,7 @@ const LikeButton = ({ likeableId, likeableType, setLikeCount, initState }) => {
     mutationFn: () => likeQuery(likeableId, likeableType),
     onSuccess: () => {
       setIsLiked(true);
-      setLikeCount((prev) => prev + 1);
+      setLikesCount((prev) => prev + 1);
     },
     onError: (error) => {
       console.log(error.response.data);
@@ -29,7 +29,7 @@ const LikeButton = ({ likeableId, likeableType, setLikeCount, initState }) => {
     mutationFn: () => unLikeQuery(likeableId, likeableType),
     onSuccess: () => {
       setIsLiked(false);
-      setLikeCount((prev) => prev - 1);
+      setLikesCount((prev) => prev - 1);
     },
     onError: (error) => {
       console.log(error.response.data);
@@ -57,7 +57,7 @@ const LikeButton = ({ likeableId, likeableType, setLikeCount, initState }) => {
 };
 
 LikeButton.propTypes = {
-  setLikeCount: PropTypes.func,
+  setLikesCount: PropTypes.func,
   initState: PropTypes.bool,
   likeableId: PropTypes.number,
   likeableType: PropTypes.string,
