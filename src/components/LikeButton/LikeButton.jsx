@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "@context/AuthContext.jsx";
-import { showToast } from "@utils/toast";
-import { UNATHORIZED } from "@constants/toastMessages";
+import { showToast } from "@utils/toast.js";
+import { UNATHORIZED } from "@constants/toastMessages.js";
 import { useMutation } from "react-query";
 import PropTypes from "prop-types";
-import { likeQuery, unLikeQuery } from "./queries";
+import { likeQuery, unLikeQuery } from "./queries.js";
 
 const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
   const { user } = useContext(AuthContext);
@@ -59,7 +59,7 @@ const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
 LikeButton.propTypes = {
   setLikesCount: PropTypes.func,
   initState: PropTypes.bool,
-  likeableId: PropTypes.number,
+  likeableId: PropTypes.any,
   likeableType: PropTypes.string,
 };
 

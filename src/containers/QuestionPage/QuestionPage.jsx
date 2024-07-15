@@ -27,11 +27,13 @@ const QuestionPage = () => {
   const [question, setQuestion] = useState(null);
   const [editorContent, setEditorContent] = useState("");
   const [editorPlainText, setEditorPlainText] = useState("");
+  const [answerErrors, setAnswerErrors] = useState({});
   const quillRef = useRef(null);
 
   const resetAnswerEditor = () => {
     setEditorContent("");
     setEditorPlainText("");
+    setAnswerErrors({});
   };
 
   const { isLoading } = useQuery(
@@ -56,6 +58,7 @@ const QuestionPage = () => {
       showToast("Ответ успешно создан");
     },
     onError: (error) => {
+      setAnswerErrors(error.response.data);
       console.log(error.response.data);
     },
   });
@@ -111,6 +114,20 @@ const QuestionPage = () => {
           <Question question={question} />
           <div className="px-8 py-4 rounded-lg shadow-md">
             <h1 className="text-3xl ">Ответить на вопрос</h1>
+            {Object.keys(answerErrors).length > 0 && (
+              <div className="ml-28 mt-4">
+                <ul className="list-disc text-danger">
+                  {Object.entries(answerErrors).map((errorEntry) => {
+                    const key = errorEntry[0];
+                    const errors = errorEntry[1]
+                      .map((error) => `${key} ${error}`)
+                      .join(". ");
+
+                    return <li key={key}>{errors}</li>;
+                  })}
+                </ul>
+              </div>
+            )}
             <div className="mt-4 flex flex-row">
               <a className="hidden sm:flex items-center basis-28" href="#">
                 <img

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { gravatarUrl } from "@utils/gravatarUrl.js";
 import { Divider } from "@nextui-org/react";
 import { BiSolidCommentDetail } from "react-icons/bi";
-import LikeButton from "@components/Questions/LikeButton/index.js";
+import LikeButton from "@components/LikeButton/index.js";
 import moment from "moment/min/moment-with-locales";
 
 const Answer = ({ answer }) => {

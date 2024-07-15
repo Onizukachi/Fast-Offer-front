@@ -6,7 +6,7 @@ import moment from "moment/min/moment-with-locales";
 import { BiSolidCommentDetail } from "react-icons/bi";
 import { FaEye } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
-import LikeButton from "@components/Questions/LikeButton";
+import LikeButton from "@components/LikeButton";
 import Positions from "@components/Questions/Positions/Positions.jsx";
 import AuthorInfo from "@components/Questions/AuthorInfo/index.js";
 
@@ -68,7 +68,7 @@ const Question = ({ question }) => {
         </div>
       </div>
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-4 sm:gap-2 mt-1">
+        <div className="flex flex-wrap gap-4 sm:gap-2 sm:mt-1 mt-3">
           {tags.map((tag) => {
             return (
               <Chip key={tag.id} size="sm" className="cursor-pointer">
