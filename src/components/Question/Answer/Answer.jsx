@@ -1,3 +1,4 @@
+import "./Answer.module.css";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { gravatarUrl } from "@utils/gravatarUrl.js";
@@ -29,6 +30,7 @@ const Answer = ({ answer }) => {
         </a>
       </div>
       <div
+        id="entity"
         className="mt-2 text-lg"
         dangerouslySetInnerHTML={{ __html: answer.body }}
       />
@@ -36,7 +38,7 @@ const Answer = ({ answer }) => {
       <div className="flex justify-between gap-4 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
         <div className="flex gap-5">
           <div className="flex">
-            <BiSolidCommentDetail size="1.4em"/>
+            <BiSolidCommentDetail size="1.4em" />
             <p className="ml-2">{answer.comments.length}</p>
           </div>
           <div className="flex">
@@ -44,12 +46,14 @@ const Answer = ({ answer }) => {
               setLikesCount={setLikesCount}
               initState={answer.liked}
               likeableId={answer.id}
-              likeableType={'Answer'}
+              likeableType={"Answer"}
             />
-            <p className="ml-2">{new Intl.NumberFormat('ru', {
-              notation: 'compact',
-              maximumFractionDigits: 1
-            }).format(likesCount)}</p>
+            <p className="ml-2">
+              {new Intl.NumberFormat("ru", {
+                notation: "compact",
+                maximumFractionDigits: 1,
+              }).format(likesCount)}
+            </p>
           </div>
         </div>
       </div>

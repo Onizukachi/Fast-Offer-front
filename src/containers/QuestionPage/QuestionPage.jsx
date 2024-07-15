@@ -8,6 +8,8 @@ import AuthContext from "@context/AuthContext.jsx";
 import { gravatarUrl } from "@utils/gravatarUrl";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import hljs from "highlight.js";
+import "highlight.js/styles/monokai-sublime.css";
 import { Button } from "@nextui-org/react";
 import { MdComment } from "react-icons/md";
 import {
@@ -29,6 +31,19 @@ const QuestionPage = () => {
   const [editorPlainText, setEditorPlainText] = useState("");
   const [answerErrors, setAnswerErrors] = useState({});
   const quillRef = useRef(null);
+  hljs.configure({
+    languages: [
+      "javascript",
+      "CSS",
+      "HTML",
+      "java",
+      "ruby",
+      "python",
+      "sql",
+      "json",
+      "php",
+    ],
+  });
 
   const resetAnswerEditor = () => {
     setEditorContent("");
@@ -45,8 +60,15 @@ const QuestionPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
+  const getUnprivilegedEditor = () => {
+    if (!quillRef.current) return;
+
+    const editor = quillRef.current.getEditor();
+    return quillRef.current.makeUnprivilegedEditor(editor);
+  };
+
   const createAnswerMutation = useMutation({
-    mutationFn: () => createAnswerQuery(id, editorContent),
+    mutationFn: () => createAnswerQuery(id, getUnprivilegedEditor()?.getHTML()),
     onSuccess: (data) => {
       const deserializedAnswer = deserialize(data).data;
       setQuestion({
@@ -74,7 +96,7 @@ const QuestionPage = () => {
 
   const handleEditorChange = (content, editor) => {
     setEditorPlainText(editor.getText());
-    setEditorContent(content);
+    setEditorContent(editor.getHTML());
   };
 
   const validateAnswer = () => {
@@ -83,6 +105,9 @@ const QuestionPage = () => {
 
   const modules = useMemo(() => {
     return {
+      syntax: {
+        highlight: (text) => hljs.highlightAuto(text).value,
+      },
       toolbar: {
         container: [
           [{ header: [1, 2, false] }],
