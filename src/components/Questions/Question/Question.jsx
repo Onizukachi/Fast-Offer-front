@@ -9,6 +9,7 @@ import { NavLink } from "react-router-dom";
 import LikeButton from "@components/LikeButton";
 import Positions from "@components/Questions/Positions/Positions.jsx";
 import AuthorInfo from "@components/Questions/AuthorInfo/index.js";
+import {normalizeCountForm} from "@utils/normalizeCountForm.js";
 
 const Question = ({ question }) => {
   const { author, positions, tags } = question;
@@ -48,6 +49,13 @@ const Question = ({ question }) => {
           <div className="flex">
             <BiSolidCommentDetail size="1.4em" />
             <p className="ml-2">{question.answers_count}</p>
+            <p className="ml-2 text-default-500">
+              {normalizeCountForm(question.answers_count, [
+                "ответ",
+                "ответа",
+                "ответов",
+              ])}
+            </p>
           </div>
           <div className="flex">
             <FaEye size="1.4em" />

@@ -117,11 +117,9 @@ const QuestionPage = () => {
             "underline",
             "strike",
             "blockquote",
-            "code",
             "code-block",
           ],
-          [{ list: "ordered" }, { list: "bullet" }, "link"],
-          [{ align: [] }],
+          [{ list: "ordered" }, { list: "bullet" }, "link", { align: [] }],
           ["clean"],
         ],
       },
@@ -192,9 +190,14 @@ const QuestionPage = () => {
           </div>
           <div className="px-8 py-4 rounded-lg shadow-md">
             <h1 className="text-3xl ">{`${question.answers_count} ${normalizeCountForm(question.answers_count, ["ответ", "ответа", "ответов"])}`}</h1>
-            <div className="flex flex-col gap-6">
-              {question.answers.map((answer) => {
-                return <Answer key={answer.id} answer={answer} />;
+            <div className="flex flex-col gap-2">
+              {question.answers.map((answer, index) => {
+                return (
+                  <div key={answer.id}>
+                    <Answer answer={answer} />
+                    { (index !== question.answers.length - 1) && <Divider className="mt-1" /> }
+                  </div>
+                );
               })}
             </div>
           </div>
