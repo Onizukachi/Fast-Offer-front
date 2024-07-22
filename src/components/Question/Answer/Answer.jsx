@@ -6,16 +6,99 @@ import { BiSolidCommentDetail } from "react-icons/bi";
 import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
 import { normalizeCountForm } from "@utils/normalizeCountForm";
-import Comment from "@components/Comment"
+import Comment from "@components/Comment";
+import { commentsQuery } from "./queries";
+import {useMutation, useQuery} from "react-query";
+import {createCommentQuery} from "@components/Comment/queries.js";
+import {showToast} from "@utils/toast.js";
+import {Textarea} from "@nextui-org/input";
+import {Button} from "@nextui-org/react";
+import useCommentTree from "@components/Comment/useCommentTree.js";
 
 const Answer = ({ answer }) => {
-  console.log(answer)
   const [likesCount, setLikesCount] = useState(answer.likes_count);
-  const [showComments, setShowComments] = useState(false)
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentErrors, setCommentErrors] = useState("")
+  const [commentBody, setCommentBody] = useState("")
+  const [commentsCount, setCommentsCount] = useState(0);
+
+  const {
+    comments: commentsData,
+    insertComment,
+    editComment,
+    deleteComment
+  } = useCommentTree(comments);
+
+  const deepCountComments = (rootObjects) => {
+    let count = 0;
+
+    function recurse(objects) {
+      objects.forEach((obj) => {
+        count++;
+        if (obj.children && Array.isArray(obj.children)) {
+          recurse(obj.children);
+        }
+      });
+    }
+
+    recurse(rootObjects);
+    return count;
+  };
 
   useEffect(() => {
     setLikesCount(answer.likes_count);
   }, [answer.likes_count]);
+
+  useQuery(
+    `comments-${answer.id}`,
+    () =>
+      commentsQuery(answer.id, "Answer").then((data) => {
+        setCommentsCount(deepCountComments(data));
+        setComments(data);
+      }),
+    { refetchInterval: false, refetchOnWindowFocus: false },
+  );
+
+  const createCommentMutation = useMutation({
+    mutationFn: () => createCommentQuery(answer.id, 'Answer', commentBody),
+    onSuccess: (data) => {
+      setCommentBody("")
+      handleReply(undefined, data[0]);
+      showToast("Комментарий оставлен");
+    },
+    onError: (error) => {
+      // setAnswerErrors(error.response.data);
+      console.log(error.response.data);
+      let errorsMsg = []
+      //
+      //     console.log(error.response.data.errors)
+      //
+      //     for (const [key, value] of Object.entries(error.response.data.errors)) {
+      //       errorsMsg.push(`${key} ${value}`);
+      //     }
+      //
+      //     setCommentErrors(errorsMsg.join(". "))
+    },
+  });
+
+  const handleReply = (commentId, content) => {
+    insertComment(commentId, content);
+  };
+
+  const handleEdit = (commentId, content) => {
+    editComment(commentId, content);
+  };
+
+  const handleDelete = (commentId) => {
+    deleteComment(commentId);
+  };
+
+  const handleSubmit = () => {
+    if (commentBody) {
+      createCommentMutation.mutate()
+    }
+  };
 
   return (
     <div key={answer.id} className="mt-4 flex flex-col">
@@ -39,10 +122,19 @@ const Answer = ({ answer }) => {
       />
       <div className="flex justify-between gap-4 mt-4 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
         <div className="flex -ml-3">
-          <div onClick={() => setShowComments(!showComments) } className="flex hover:bg-gray-200 cursor-pointer rounded-lg px-3 py-2">
+          <div
+            onClick={() => setShowComments(!showComments)}
+            className="flex hover:bg-gray-200 cursor-pointer rounded-lg px-3 py-2"
+          >
             <BiSolidCommentDetail size="1.4em" />
-            <p className="ml-2">{answer.comments.length}</p>
-            <p className="ml-2 text-default-500">{normalizeCountForm(answer.comments.length, ["Комментарий", "Комментария", "Комментариев"])}</p>
+            <p className="ml-2">{commentsCount}</p>
+            <p className="ml-2 text-default-500">
+              {normalizeCountForm(commentsCount, [
+                "Комментарий",
+                "Комментария",
+                "Комментариев",
+              ])}
+            </p>
           </div>
           <div className="flex px-3 py-2">
             <LikeButton
@@ -60,12 +152,38 @@ const Answer = ({ answer }) => {
           </div>
         </div>
       </div>
-      <div className="">
-        { showComments && answer.comments.map((comment) => {
-          return (
-            <Comment key={comment.id} comment={comment} />
-          )
-        }) }
+      {showComments && (
+        <div className="mt-2">
+          <Textarea
+            variant={"bordered"}
+            autoFocus={true}
+            placeholder="Введите ваш комментарий"
+            fullWidth={true}
+            value={commentBody}
+            onChange={(e) => setCommentBody(e.target.value)}
+            isInvalid={false}
+            errorMessage={'ERRORRR'}
+            classNames={{
+              inputWrapper: ["bg-white"],
+            }}
+          />
+          <Button
+            className="mt-2"
+            color="default"
+            variant={"shadow"}
+            onClick={handleSubmit}
+          >
+            Комментировать
+          </Button>
+        </div>
+      )}
+      <div className="mt-2">
+        {showComments &&
+          commentsData.map((comment) => {
+            return <Comment key={comment.id} comment={comment} onSubmitComment={handleReply}
+                            onEditComment={handleEdit}
+                            onDeleteComment={handleDelete} />;
+          })}
       </div>
     </div>
   );

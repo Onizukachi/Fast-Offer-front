@@ -60,6 +60,7 @@ const QuestionPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
+
   const getUnprivilegedEditor = () => {
     if (!quillRef.current) return;
 

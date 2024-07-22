@@ -10,6 +10,7 @@ const QuestionsPage = () => {
   const { isSuccess, isLoading } = useQuery(
     `questions`,
     () => fetchQuestions().then((data) => {
+      console.log(deserialize(data).data)
       setQuestionsData(deserialize(data).data)
     }),
     { refetchInterval: false, refetchOnWindowFocus: false },
