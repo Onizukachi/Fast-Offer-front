@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 
+// types [info success warning error default]
 export const showToast = (message, type='success') => {
   toast[type](message, {
     position: "top-center",

@@ -3,13 +3,16 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { gravatarUrl } from "@utils/gravatarUrl";
 import { BiSolidCommentDetail } from "react-icons/bi";
+import { CiMenuKebab } from "react-icons/ci";
 import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
-import { createCommentQuery } from "./queries";
+import {createCommentQuery, deleteCommentQuery} from "./queries";
 import { useMutation } from "react-query";
 import { showToast } from "@utils/toast.js";
 import { Textarea } from "@nextui-org/input";
-import { Button } from "@nextui-org/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, cn} from "@nextui-org/react";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { MdEdit } from "react-icons/md";
 
 const Comment = ({
   comment,
@@ -36,6 +39,18 @@ const Comment = ({
     },
   });
 
+  const deleteCommentMutation = useMutation({
+    mutationFn: () => deleteCommentQuery(comment.id),
+    onSuccess: () => {
+      onDeleteComment(comment.id);
+      showToast("Комментарий успешно удален");
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+      showToast("Не получилось удалить комментарий", "error");
+    },
+  });
+
   useEffect(() => {
     setLikesCount(comment.likes_count);
   }, [comment.likes_count]);
@@ -45,6 +60,16 @@ const Comment = ({
       createCommentMutation.mutate();
     }
   };
+
+  const handleAction = (action) => {
+    switch (action) {
+      case 'delete':
+        deleteCommentMutation.mutate()
+        break;
+      case 'edit':
+        break;
+    }
+  }
 
   return (
     <>
@@ -56,14 +81,46 @@ const Comment = ({
           <span className="text-default-500">
             {moment(comment.created_at).format("LL")}
           </span>
-          <a className="flex items-center" href="#">
-            <img
-              className="ml-0 mr-4 sm:mx-4 w-10 h-10 object-cover rounded-full sm:block"
-              src={gravatarUrl(author.gravatar_hash)}
-              alt="avatar"
-            />
-            <h1 className="text-medium font-bold">{author.nickname}</h1>
-          </a>
+          <div className='flex gap-2 sm:gap-4 items-center'>
+            <a className="flex items-center" href="#">
+              <img
+                className="ml-0 mr-4 sm:mx-4 w-10 h-10 object-cover rounded-full sm:block"
+                src={gravatarUrl(author.gravatar_hash)}
+                alt="avatar"
+              />
+              <h1 className="text-medium font-bold hidden sm:block">{author.nickname}</h1>
+            </a>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button
+                 variant="light"
+                 className="min-w-0 px-0"
+                >
+                  <CiMenuKebab size="1.4em" className='cursor-pointer' />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                onAction={handleAction}
+                variant="faded"
+                            aria-label="Dropdown menu with description">
+                <DropdownItem
+                  key="edit"
+                  showDivider
+                  startContent={<MdEdit size="1.3em" />}
+                >
+                  Редактировать
+                </DropdownItem>
+                <DropdownItem
+                  key="delete"
+                  className="text-danger"
+                  color="danger"
+                  startContent={<FaRegTrashAlt size="1.3em" />}
+                >
+                  Удалить
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
         </div>
         <div
           id="entity"
