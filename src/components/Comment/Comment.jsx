@@ -6,13 +6,28 @@ import { BiSolidCommentDetail } from "react-icons/bi";
 import { CiMenuKebab } from "react-icons/ci";
 import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
-import {createCommentQuery, deleteCommentQuery} from "./queries";
+import {
+  createCommentQuery,
+  deleteCommentQuery,
+  updateCommentQuery,
+} from "./queries";
 import { useMutation } from "react-query";
-import { showToast } from "@utils/toast.js";
+import { showToast } from "@utils/toast";
 import { Textarea } from "@nextui-org/input";
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, cn} from "@nextui-org/react";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button,
+} from "@nextui-org/react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
+
+const DEFAULT_ERROR_STATUS = {
+  isInvalid: false,
+  errors: "Возникли непонятые ошибки",
+};
 
 const Comment = ({
   comment,
@@ -22,20 +37,60 @@ const Comment = ({
 }) => {
   const [likesCount, setLikesCount] = useState(comment.likes_count);
   const [showInput, setShowInput] = useState(false);
-  const [commentBody, setCommentBody] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [newCommentBody, setNewCommentBody] = useState("");
+  const [editedBody, setEditedBody] = useState(comment.body);
+  const [createErrorStatus, setCreateErrorStatus] =
+    useState(DEFAULT_ERROR_STATUS);
+  const [updateErrorStatus, setUpdateErrorStatus] =
+    useState(DEFAULT_ERROR_STATUS);
+
   const author = comment.author.data.attributes;
 
+  useEffect(() => {
+    setEditedBody(comment.body);
+  }, [comment.body]);
+
+  useEffect(() => {
+    setLikesCount(comment.likes_count);
+  }, [comment.likes_count]);
+
   const createCommentMutation = useMutation({
-    mutationFn: () => createCommentQuery(comment.id, "Comment", commentBody),
+    mutationFn: () => createCommentQuery(comment.id, "Comment", newCommentBody),
     onSuccess: (data) => {
-      setCommentBody("");
+      setNewCommentBody("");
       onSubmitComment(comment.id, data[0]);
-      setShowInput(false);
+      toggleInput();
       showToast("Комментарий оставлен");
     },
     onError: (error) => {
-      // setAnswerErrors(error.response.data);
-      console.log(error.response.data);
+      const errorsData = error.response.data.errors;
+
+      let errorsArray = [];
+      for (const [key, value] of Object.entries(errorsData)) {
+        errorsArray.push(`${key} ${value.join(", ")}`);
+      }
+
+      setCreateErrorStatus({ isInvalid: true, errors: errorsArray.join(". ") });
+    },
+  });
+
+  const updateCommentMutation = useMutation({
+    mutationFn: () => updateCommentQuery(comment.id, editedBody),
+    onSuccess: (data) => {
+      setEditMode(false);
+      onEditComment(comment.id, data[0]);
+      showToast("Комментарий отредактирован");
+    },
+    onError: (error) => {
+      const errorsData = error.response.data.errors;
+
+      let errorsArray = [];
+      for (const [key, value] of Object.entries(errorsData)) {
+        errorsArray.push(`${key} ${value.join(", ")}`);
+      }
+
+      setUpdateErrorStatus({ isInvalid: true, errors: errorsArray.join(". ") });
     },
   });
 
@@ -51,25 +106,43 @@ const Comment = ({
     },
   });
 
-  useEffect(() => {
-    setLikesCount(comment.likes_count);
-  }, [comment.likes_count]);
+  const toggleInput = () => {
+    setShowInput(!showInput);
+  };
+
+  const toggleEditMode = () => {
+    setEditMode(!editMode);
+    setEditedBody(comment.body);
+  };
+
+  const handleInputChange = (e) => {
+    if (editMode) {
+      setEditedBody(e.target.value);
+    } else {
+      setNewCommentBody(e.target.value);
+    }
+  };
 
   const handleSubmit = () => {
-    if (commentBody) {
+    if (newCommentBody) {
       createCommentMutation.mutate();
     }
   };
 
+  const handleEditSubmit = () => {
+    updateCommentMutation.mutate();
+  };
+
   const handleAction = (action) => {
     switch (action) {
-      case 'delete':
-        deleteCommentMutation.mutate()
+      case "delete":
+        deleteCommentMutation.mutate();
         break;
-      case 'edit':
+      case "edit":
+        toggleEditMode();
         break;
     }
-  }
+  };
 
   return (
     <>
@@ -81,28 +154,28 @@ const Comment = ({
           <span className="text-default-500">
             {moment(comment.created_at).format("LL")}
           </span>
-          <div className='flex gap-2 sm:gap-4 items-center'>
+          <div className="flex gap-2 sm:gap-4 items-center">
             <a className="flex items-center" href="#">
               <img
                 className="ml-0 mr-4 sm:mx-4 w-10 h-10 object-cover rounded-full sm:block"
                 src={gravatarUrl(author.gravatar_hash)}
                 alt="avatar"
               />
-              <h1 className="text-medium font-bold hidden sm:block">{author.nickname}</h1>
+              <h1 className="text-medium font-bold hidden sm:block">
+                {author.nickname}
+              </h1>
             </a>
             <Dropdown>
               <DropdownTrigger>
-                <Button
-                 variant="light"
-                 className="min-w-0 px-0"
-                >
-                  <CiMenuKebab size="1.4em" className='cursor-pointer' />
+                <Button variant="light" className="min-w-0 px-0">
+                  <CiMenuKebab size="1.4em" className="cursor-pointer" />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
                 onAction={handleAction}
                 variant="faded"
-                            aria-label="Dropdown menu with description">
+                aria-label="Dropdown menu with description"
+              >
                 <DropdownItem
                   key="edit"
                   showDivider
@@ -122,21 +195,54 @@ const Comment = ({
             </Dropdown>
           </div>
         </div>
-        <div
-          id="entity"
-          className="mt-2 text-lg"
-          dangerouslySetInnerHTML={{ __html: comment.body }}
-        />
+        {!editMode ? (
+          <div
+            id="entity"
+            className="mt-2 text-lg"
+            dangerouslySetInnerHTML={{ __html: comment.body }}
+          />
+        ) : (
+          <div className="mt-2">
+            <Textarea
+              variant={"bordered"}
+              autoFocus={true}
+              fullWidth={true}
+              value={editedBody}
+              onChange={handleInputChange}
+              isInvalid={updateErrorStatus.isInvalid}
+              errorMessage={updateErrorStatus.errors}
+              classNames={{
+                inputWrapper: ["bg-white"],
+              }}
+            />
+            <div className="mt-2 flex gap-2">
+              <Button
+                color="default"
+                variant={"shadow"}
+                onPress={handleEditSubmit}
+                isDisabled={!editedBody}
+              >
+                Cохранить
+              </Button>
+              <Button
+                color="default"
+                variant={"shadow"}
+                onPress={() => toggleEditMode()}
+              >
+                Отмена
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between gap-4 mt-4 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
           <div className="flex -ml-3">
             <div
-              onClick={() => setShowInput(!showInput)}
+              onClick={() => toggleInput()}
               className="flex hover:bg-gray-200 cursor-pointer rounded-lg px-3 py-2"
             >
               <BiSolidCommentDetail size="1.4em" />
-              <p className="ml-2 text-default-500">
-                {showInput ? "Отмена" : "Ответить"}
-              </p>
+              <p className="ml-2 text-default-500">Ответить</p>
             </div>
             <div className="flex px-3 py-2">
               <LikeButton
@@ -162,22 +268,31 @@ const Comment = ({
               autoFocus={true}
               placeholder="Введите ваш комментарий"
               fullWidth={true}
-              value={commentBody}
-              onChange={(e) => setCommentBody(e.target.value)}
-              isInvalid={false}
-              errorMessage={"ERRORRR"}
+              value={newCommentBody}
+              onChange={handleInputChange}
+              isInvalid={createErrorStatus.isInvalid}
+              errorMessage={createErrorStatus.errors}
               classNames={{
                 inputWrapper: ["bg-white"],
               }}
             />
-            <Button
-              className="mt-2"
-              color="default"
-              variant={"shadow"}
-              onPress={handleSubmit}
-            >
-              Комментировать
-            </Button>
+            <div className="mt-2 flex gap-2">
+              <Button
+                color="default"
+                variant={"shadow"}
+                onPress={handleSubmit}
+                isDisabled={!newCommentBody}
+              >
+                Комментировать
+              </Button>
+              <Button
+                color="default"
+                variant={"shadow"}
+                onPress={() => toggleInput()}
+              >
+                Отмена
+              </Button>
+            </div>
           </div>
         )}
 

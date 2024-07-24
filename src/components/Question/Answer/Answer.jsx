@@ -7,27 +7,41 @@ import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
 import { normalizeCountForm } from "@utils/normalizeCountForm";
 import Comment from "@components/Comment";
-import { commentsQuery } from "./queries";
-import {useMutation, useQuery} from "react-query";
-import {createCommentQuery} from "@components/Comment/queries.js";
-import {showToast} from "@utils/toast.js";
-import {Textarea} from "@nextui-org/input";
-import {Button} from "@nextui-org/react";
-import useCommentTree from "@components/Comment/useCommentTree.js";
+import { commentsQuery, deleteAnswerQuery } from "./queries";
+import { useMutation, useQuery } from "react-query";
+import { createCommentQuery } from "@components/Comment/queries";
+import { showToast } from "@utils/toast";
+import { Textarea } from "@nextui-org/input";
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@nextui-org/react";
+import useCommentTree from "@components/Comment/useCommentTree";
+import { CiMenuKebab } from "react-icons/ci";
+import { FaRegTrashAlt } from "react-icons/fa";
 
-const Answer = ({ answer }) => {
+const DEFAULT_ERROR_STATUS = {
+  isInvalid: false,
+  errors: "Возникли непонятые ошибки",
+};
+
+const Answer = ({ answer, questionId, onDelete }) => {
   const [likesCount, setLikesCount] = useState(answer.likes_count);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
-  const [commentErrors, setCommentErrors] = useState("")
-  const [commentBody, setCommentBody] = useState("")
+  const [newCommentBody, setNewCommentBody] = useState("");
   const [commentsCount, setCommentsCount] = useState(0);
+  const [createCommentErrorStatus, setCreateCommentErrorStatus] =
+    useState(DEFAULT_ERROR_STATUS);
 
   const {
     comments: commentsData,
     insertComment,
     editComment,
-    deleteComment
+    deleteComment,
   } = useCommentTree(comments);
 
   const deepCountComments = (rootObjects) => {
@@ -61,24 +75,37 @@ const Answer = ({ answer }) => {
   );
 
   const createCommentMutation = useMutation({
-    mutationFn: () => createCommentQuery(answer.id, 'Answer', commentBody),
+    mutationFn: () => createCommentQuery(answer.id, "Answer", newCommentBody),
     onSuccess: (data) => {
-      setCommentBody("")
+      setNewCommentBody("");
+      setCreateCommentErrorStatus(DEFAULT_ERROR_STATUS);
       handleReply(undefined, data[0]);
       showToast("Комментарий оставлен");
     },
     onError: (error) => {
-      // setAnswerErrors(error.response.data);
+      const errorsData = error.response.data.errors;
+
+      let errorsArray = [];
+      for (const [key, value] of Object.entries(errorsData)) {
+        errorsArray.push(`${key} ${value.join(", ")}`);
+      }
+
+      setCreateCommentErrorStatus({
+        isInvalid: true,
+        errors: errorsArray.join(". "),
+      });
+    },
+  });
+
+  const deleteAnswerMutation = useMutation({
+    mutationFn: () => deleteAnswerQuery(questionId, answer.id),
+    onSuccess: () => {
+      onDelete(answer.id);
+      showToast("Ответ успешно удален");
+    },
+    onError: (error) => {
       console.log(error.response.data);
-      let errorsMsg = []
-      //
-      //     console.log(error.response.data.errors)
-      //
-      //     for (const [key, value] of Object.entries(error.response.data.errors)) {
-      //       errorsMsg.push(`${key} ${value}`);
-      //     }
-      //
-      //     setCommentErrors(errorsMsg.join(". "))
+      showToast("Не получилось удалить ответ", "error");
     },
   });
 
@@ -95,8 +122,19 @@ const Answer = ({ answer }) => {
   };
 
   const handleSubmit = () => {
-    if (commentBody) {
-      createCommentMutation.mutate()
+    if (newCommentBody) {
+      createCommentMutation.mutate();
+    }
+  };
+
+  const handleAnswerAction = (action) => {
+    switch (action) {
+      case "delete":
+        deleteAnswerMutation.mutate();
+        break;
+      case "edit":
+        // TO DO
+        break;
     }
   };
 
@@ -106,14 +144,39 @@ const Answer = ({ answer }) => {
         <span className="text-default-500">
           {moment(answer.created_at).format("LL")}
         </span>
-        <a className="flex items-center" href="#">
-          <img
-            className="ml-0 mr-4 sm:mx-4 w-10 h-10 object-cover rounded-full sm:block"
-            src={gravatarUrl(answer.author.gravatar_hash)}
-            alt="avatar"
-          />
-          <h1 className="text-medium font-bold">{answer.author.nickname}</h1>
-        </a>
+        <div className="flex gap-2 sm:gap-4 items-center">
+          <a className="flex items-center" href="#">
+            <img
+              className="ml-0 mr-4 sm:mx-4 w-10 h-10 object-cover rounded-full sm:block"
+              src={gravatarUrl(answer.author.gravatar_hash)}
+              alt="avatar"
+            />
+            <h1 className="text-medium font-bold hidden sm:block">
+              {answer.author.nickname}
+            </h1>
+          </a>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="light" className="min-w-0 px-0">
+                <CiMenuKebab size="1.4em" className="cursor-pointer" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              onAction={handleAnswerAction}
+              variant="faded"
+              aria-label="Dropdown menu with description"
+            >
+              <DropdownItem
+                key="delete"
+                className="text-danger"
+                color="danger"
+                startContent={<FaRegTrashAlt size="1.3em" />}
+              >
+                Удалить
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
       </div>
       <div
         id="entity"
@@ -159,10 +222,10 @@ const Answer = ({ answer }) => {
             autoFocus={true}
             placeholder="Введите ваш комментарий"
             fullWidth={true}
-            value={commentBody}
-            onChange={(e) => setCommentBody(e.target.value)}
-            isInvalid={false}
-            errorMessage={'ERRORRR'}
+            value={newCommentBody}
+            onChange={(e) => setNewCommentBody(e.target.value)}
+            isInvalid={createCommentErrorStatus.isInvalid}
+            errorMessage={createCommentErrorStatus.errors}
             classNames={{
               inputWrapper: ["bg-white"],
             }}
@@ -172,6 +235,7 @@ const Answer = ({ answer }) => {
             color="default"
             variant={"shadow"}
             onClick={handleSubmit}
+            isDisabled={!newCommentBody}
           >
             Комментировать
           </Button>
@@ -180,9 +244,15 @@ const Answer = ({ answer }) => {
       <div className="mt-2">
         {showComments &&
           commentsData.map((comment) => {
-            return <Comment key={comment.id} comment={comment} onSubmitComment={handleReply}
-                            onEditComment={handleEdit}
-                            onDeleteComment={handleDelete} />;
+            return (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                onSubmitComment={handleReply}
+                onEditComment={handleEdit}
+                onDeleteComment={handleDelete}
+              />
+            );
           })}
       </div>
     </div>
@@ -191,6 +261,8 @@ const Answer = ({ answer }) => {
 
 Answer.propTypes = {
   answer: PropTypes.object,
+  onDelete: PropTypes.func,
+  questionId: PropTypes.number,
 };
 
 export default Answer;
