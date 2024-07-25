@@ -24,11 +24,6 @@ import {
 import { FaRegTrashAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
-const DEFAULT_ERROR_STATUS = {
-  isInvalid: false,
-  errors: "Возникли непонятые ошибки",
-};
-
 const Comment = ({
   comment,
   onSubmitComment,
@@ -37,13 +32,11 @@ const Comment = ({
 }) => {
   const [likesCount, setLikesCount] = useState(comment.likes_count);
   const [showInput, setShowInput] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   const [newCommentBody, setNewCommentBody] = useState("");
+  const [editMode, setEditMode] = useState(false);
   const [editedBody, setEditedBody] = useState(comment.body);
-  const [createErrorStatus, setCreateErrorStatus] =
-    useState(DEFAULT_ERROR_STATUS);
-  const [updateErrorStatus, setUpdateErrorStatus] =
-    useState(DEFAULT_ERROR_STATUS);
+  const [createErrors, setCreateErrors] = useState([]);
+  const [updateErrors, setUpdateErrors] = useState([]);
 
   const author = comment.author.data.attributes;
 
@@ -64,14 +57,8 @@ const Comment = ({
       showToast("Комментарий оставлен");
     },
     onError: (error) => {
-      const errorsData = error.response.data.errors;
-
-      let errorsArray = [];
-      for (const [key, value] of Object.entries(errorsData)) {
-        errorsArray.push(`${key} ${value.join(", ")}`);
-      }
-
-      setCreateErrorStatus({ isInvalid: true, errors: errorsArray.join(". ") });
+      console.log(error.response.data);
+      setCreateErrors(error.response.data);
     },
   });
 
@@ -79,18 +66,13 @@ const Comment = ({
     mutationFn: () => updateCommentQuery(comment.id, editedBody),
     onSuccess: (data) => {
       setEditMode(false);
+      setUpdateErrors([]);
       onEditComment(comment.id, data[0]);
       showToast("Комментарий отредактирован");
     },
     onError: (error) => {
-      const errorsData = error.response.data.errors;
-
-      let errorsArray = [];
-      for (const [key, value] of Object.entries(errorsData)) {
-        errorsArray.push(`${key} ${value.join(", ")}`);
-      }
-
-      setUpdateErrorStatus({ isInvalid: true, errors: errorsArray.join(". ") });
+      console.log(error.response.data);
+      setUpdateErrors(error.response.data);
     },
   });
 
@@ -209,8 +191,8 @@ const Comment = ({
               fullWidth={true}
               value={editedBody}
               onChange={handleInputChange}
-              isInvalid={updateErrorStatus.isInvalid}
-              errorMessage={updateErrorStatus.errors}
+              isInvalid={updateErrors.length > 0}
+              errorMessage={updateErrors.join(". ")}
               classNames={{
                 inputWrapper: ["bg-white"],
               }}
@@ -270,8 +252,8 @@ const Comment = ({
               fullWidth={true}
               value={newCommentBody}
               onChange={handleInputChange}
-              isInvalid={createErrorStatus.isInvalid}
-              errorMessage={createErrorStatus.errors}
+              isInvalid={createErrors.length > 0}
+              errorMessage={createErrors.join(". ")}
               classNames={{
                 inputWrapper: ["bg-white"],
               }}

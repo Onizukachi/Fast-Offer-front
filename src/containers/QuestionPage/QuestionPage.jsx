@@ -3,7 +3,7 @@ import { useContext, useState, useMemo, useRef } from "react";
 import { fetchQuestion } from "./queries";
 import { Divider, Spinner } from "@nextui-org/react";
 import Question from "@components/Questions/Question";
-import { NavLink, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import AuthContext from "@context/AuthContext";
 import { gravatarUrl } from "@utils/gravatarUrl";
 import ReactQuill from "react-quill";
@@ -76,6 +76,7 @@ const QuestionPage = () => {
       showToast("Ответ успешно создан");
     },
     onError: (error) => {
+      console.log(error.response.data);
       setAnswerErrors(error.response.data);
     },
   });

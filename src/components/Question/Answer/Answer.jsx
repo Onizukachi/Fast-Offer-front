@@ -23,19 +23,13 @@ import useCommentTree from "@components/Comment/useCommentTree";
 import { CiMenuKebab } from "react-icons/ci";
 import { FaRegTrashAlt } from "react-icons/fa";
 
-const DEFAULT_ERROR_STATUS = {
-  isInvalid: false,
-  errors: "Возникли непонятые ошибки",
-};
-
 const Answer = ({ answer, questionId, onDelete }) => {
   const [likesCount, setLikesCount] = useState(answer.likes_count);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [newCommentBody, setNewCommentBody] = useState("");
   const [commentsCount, setCommentsCount] = useState(0);
-  const [createCommentErrorStatus, setCreateCommentErrorStatus] =
-    useState(DEFAULT_ERROR_STATUS);
+  const [commentErrors, setCommentErrors] = useState([]);
 
   const {
     comments: commentsData,
@@ -78,22 +72,13 @@ const Answer = ({ answer, questionId, onDelete }) => {
     mutationFn: () => createCommentQuery(answer.id, "Answer", newCommentBody),
     onSuccess: (data) => {
       setNewCommentBody("");
-      setCreateCommentErrorStatus(DEFAULT_ERROR_STATUS);
-      handleReply(undefined, data[0]);
+      setCommentErrors([]);
+      insertComment(undefined, data[0]);
       showToast("Комментарий оставлен");
     },
     onError: (error) => {
-      const errorsData = error.response.data.errors;
-
-      let errorsArray = [];
-      for (const [key, value] of Object.entries(errorsData)) {
-        errorsArray.push(`${key} ${value.join(", ")}`);
-      }
-
-      setCreateCommentErrorStatus({
-        isInvalid: true,
-        errors: errorsArray.join(". "),
-      });
+      console.log(error.response.data);
+      setCommentErrors(error.response.data);
     },
   });
 
@@ -109,19 +94,7 @@ const Answer = ({ answer, questionId, onDelete }) => {
     },
   });
 
-  const handleReply = (commentId, content) => {
-    insertComment(commentId, content);
-  };
-
-  const handleEdit = (commentId, content) => {
-    editComment(commentId, content);
-  };
-
-  const handleDelete = (commentId) => {
-    deleteComment(commentId);
-  };
-
-  const handleSubmit = () => {
+  const handleCommentSubmit = () => {
     if (newCommentBody) {
       createCommentMutation.mutate();
     }
@@ -224,8 +197,8 @@ const Answer = ({ answer, questionId, onDelete }) => {
             fullWidth={true}
             value={newCommentBody}
             onChange={(e) => setNewCommentBody(e.target.value)}
-            isInvalid={createCommentErrorStatus.isInvalid}
-            errorMessage={createCommentErrorStatus.errors}
+            isInvalid={commentErrors.length > 0}
+            errorMessage={commentErrors.join(". ")}
             classNames={{
               inputWrapper: ["bg-white"],
             }}
@@ -234,7 +207,7 @@ const Answer = ({ answer, questionId, onDelete }) => {
             className="mt-2"
             color="default"
             variant={"shadow"}
-            onClick={handleSubmit}
+            onClick={handleCommentSubmit}
             isDisabled={!newCommentBody}
           >
             Комментировать
@@ -248,9 +221,9 @@ const Answer = ({ answer, questionId, onDelete }) => {
               <Comment
                 key={comment.id}
                 comment={comment}
-                onSubmitComment={handleReply}
-                onEditComment={handleEdit}
-                onDeleteComment={handleDelete}
+                onSubmitComment={insertComment}
+                onEditComment={editComment}
+                onDeleteComment={deleteComment}
               />
             );
           })}
