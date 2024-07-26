@@ -1,24 +1,17 @@
+@import '@styles/tagsInput.css';
+@import '@styles/qlEditor.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.ql-editor img {
-    display: inline-block;
+.app {
+    padding: 40px;
+    text-align: center;
+    font-family: sans-serif;
 }
 
-#entity pre.ql-syntax {
-    background-color: #23241f;
-    color: #f8f8f2;
-    overflow: visible;
-    box-sizing: border-box;
-    line-height: 1.42;
-    height: 100%;
-    outline: none;
-    overflow-y: auto;
-    padding: 12px 15px;
-    tab-size: 4;
-    -moz-tab-size: 4;
-    text-align: left;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+.container {
+    margin: auto;
+    width: 50%;
 }

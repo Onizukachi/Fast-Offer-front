@@ -1,4 +1,3 @@
-import styles from "./Question.module.css";
 import PropTypes from "prop-types";
 import { Chip } from "@nextui-org/react";
 import { useEffect, useState, useMemo } from "react";
@@ -77,6 +76,9 @@ const Question = ({ question }) => {
       </div>
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-4 sm:gap-2 sm:mt-1 mt-3">
+          <Chip size="sm" color='primary' className="cursor-pointer">
+            {question.grade.grade}
+          </Chip>
           {tags.map((tag) => {
             return (
               <Chip key={tag.id} size="sm" className="cursor-pointer">

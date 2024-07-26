@@ -8,10 +8,13 @@ import BeatLoader from "react-spinners/BeatLoader";
 import { Input } from "@nextui-org/react";
 import { IoSearchOutline } from "react-icons/io5";
 import { debounce } from "lodash";
+import { Button } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom";
 
 const LIMIT_PER_PAGE = 10;
 
 const QuestionsPage = () => {
+  const navigate = useNavigate();
   const [questionsData, setQuestionsData] = useState([]);
   const searchTermRef = useRef("");
   const hasMoreRef = useRef(false);
@@ -55,16 +58,26 @@ const QuestionsPage = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="max-w-2xl w-full mx-auto items-center justify-center">
-        <Input
-          type="search"
+      <div className="flex items-center justify-center flex-wrap gap-6">
+        <div className="max-w-2xl w-full">
+          <Input
+            type="search"
+            size="lg"
+            onValueChange={handleSearchInputChange}
+            placeholder="Поиск по вопросам"
+            startContent={
+              <IoSearchOutline className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+            }
+          />
+        </div>
+        <Button
+          onClick={() => navigate("/questions/new", { replace: false })}
+          color="primary"
           size="lg"
-          onValueChange={handleSearchInputChange}
-          placeholder="Поиск по вопросам"
-          startContent={
-            <IoSearchOutline className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-          }
-        />
+          variant="shadow"
+        >
+          Задать вопрос
+        </Button>
       </div>
 
       {isLoading && (

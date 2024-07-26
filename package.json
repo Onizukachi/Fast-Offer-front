@@ -32,6 +32,8 @@
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.24.0",
     "react-spinners": "^0.14.1",
+    "react-tag-autocomplete": "^7.3.0",
+    "react-tag-input": "^6.10.3",
     "react-toastify": "^10.0.5"
   },
   "devDependencies": {
