@@ -6,7 +6,7 @@ import {
   tagsQuery,
 } from "@containers/NewQuestionPage/queries";
 import { updateQuestionQuery } from "./queries.js";
-import { questionQuery } from "@containers/QuestionPage/queries.js";
+import { questionQuery } from "@containers/QuestionPage/queries";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
 import { getPositionImageUrl } from "@utils/imageUtil";
@@ -20,9 +20,9 @@ import BeatLoader from "react-spinners/BeatLoader";
 const EditQuestionPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [question, setQuestion] = useState(null);
   const [editorContent, setEditorContent] = useState("");
   const [editorPlainText, setEditorPlainText] = useState("");
+  const [question, setQuestion] = useState(null)
   const [questionErrors, setQuestionErrors] = useState({
     body: [],
     grade: [],
@@ -36,27 +36,26 @@ const EditQuestionPage = () => {
   const [selectedGradeId, setSelectedGradeId] = useState(null);
   const [selectedPositionIds, setSelectedPositionIds] = useState([]);
 
-  const { isSuccess: questionIsSuccess } =
-    useQuery(
-      `question`,
-      () =>
-        questionQuery(id).then((data) => {
-          const question = deserialize(data).data;
-          setQuestion(question);
-          setEditorContent(question.body);
-          setEditorPlainText(question.body);
-          setSelectedGradeId(Number(question.grade.id));
-          setSelectedPositionIds(question.positions.map((el) => el.id));
-          setSelectedTags(
-            question.tags.map((el) => {
-              return { value: el.id, label: el.name };
-            }),
-          );
-        }),
-      { refetchInterval: false, refetchOnWindowFocus: false },
-    );
+  useQuery(
+    `question`,
+    () =>
+      questionQuery(id).then((data) => {
+        const question = deserialize(data).data;
+        setQuestion(question)
+        setEditorContent(question.body);
+        setEditorPlainText(question.body);
+        setSelectedGradeId(Number(question.grade.id));
+        setSelectedPositionIds(question.positions.map((el) => el.id));
+        setSelectedTags(
+          question.tags.map((el) => {
+            return { value: el.id, label: el.name };
+          }),
+        );
+      }),
+    { refetchInterval: false, refetchOnWindowFocus: false },
+  );
 
-  const { isSuccess: gradesIsSuccess } = useQuery(
+  useQuery(
     `grades`,
     () =>
       gradesQuery().then((data) => {
@@ -65,7 +64,7 @@ const EditQuestionPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
-  const { isSuccess: positionsIsSuccess } = useQuery(
+  useQuery(
     `positions`,
     () =>
       positionsQuery().then((data) => {
@@ -74,7 +73,7 @@ const EditQuestionPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
-  const { isSuccess: tagsIsSuccess } = useQuery(
+  useQuery(
     `tags`,
     () =>
       tagsQuery().then((data) => {
@@ -82,15 +81,6 @@ const EditQuestionPage = () => {
       }),
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
-
-  const isAllDataLoad = () => {
-    return (
-      questionIsSuccess &&
-      gradesIsSuccess &&
-      positionsIsSuccess &&
-      tagsIsSuccess
-    );
-  };
 
   const formParams = () => {
     return {
@@ -160,7 +150,7 @@ const EditQuestionPage = () => {
   return (
     <div className="flex flex-col">
       <h1 className="text-3xl text-center mb-6">Редактировать вопрос</h1>
-      {!isAllDataLoad && (
+      {!question ? (
         <div>
           <BeatLoader
             className="mt-8 text-center"
@@ -168,8 +158,7 @@ const EditQuestionPage = () => {
             color="#5c7de0"
           />
         </div>
-      )}
-      {question && grades && tags && positions && (
+      ) : (
         <div className="flex flex-col gap-6">
           {questionErrors.body.length > 0 && (
             <div className="mt-4 text-danger">
@@ -252,7 +241,7 @@ const EditQuestionPage = () => {
             onValidate={onTagValidate}
             selected={selectedTags}
             suggestions={tags.map((tag) => {
-              return { value: tag.id, label: tag.name };
+              return {value: tag.id, label: tag.name};
             })}
           />
           <Button
