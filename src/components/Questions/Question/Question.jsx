@@ -1,16 +1,25 @@
 import PropTypes from "prop-types";
-import { Chip } from "@nextui-org/react";
-import { useEffect, useState, useMemo } from "react";
+import {Button, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
+import {useEffect, useState, useMemo, useContext} from "react";
 import moment from "moment/min/moment-with-locales";
 import { BiSolidCommentDetail } from "react-icons/bi";
-import { FaEye } from "react-icons/fa";
+import {FaEye, FaRegTrashAlt} from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import LikeButton from "@components/LikeButton";
-import Positions from "@components/Questions/Positions/Positions.jsx";
-import AuthorInfo from "@components/Questions/AuthorInfo/index.js";
-import {normalizeCountForm} from "@utils/normalizeCountForm.js";
+import Positions from "@components/Questions/Positions";
+import AuthorInfo from "@components/AuthorInfo";
+import {normalizeCountForm} from "@utils/normalizeCountForm";
+import {CiMenuKebab} from "react-icons/ci";
+import AuthContext from "@context/AuthContext";
+import {MdEdit} from "react-icons/md";
+import {useMutation} from "react-query";
+import { deleteQuestionQuery } from "./queries";
+import {showToast} from "@utils/toast.js";
+import { useNavigate } from "react-router-dom";
 
-const Question = ({ question }) => {
+const Question = ({ question, refetch }) => {
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const { author, positions, tags } = question;
   const [likesCount, setLikesCount] = useState(question.likes_count);
 
@@ -28,6 +37,29 @@ const Question = ({ question }) => {
       notation: "compact",
       maximumFractionDigits: 1,
     }).format(number);
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: () => deleteQuestionQuery(question.id),
+    onSuccess: () => {
+      showToast("Вопрос успешно удален");
+      refetch();
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+      showToast("Не получилось удалить вопрос", "error");
+    },
+  });
+
+  const handleQuestionAction = (action) => {
+    switch (action) {
+      case "delete":
+        deleteQuestionMutation.mutate()
+        break;
+      case "edit":
+        // TO DO
+        break;
+    }
+  };
 
   return (
     <div className="px-8 py-4 rounded-lg shadow-md">
@@ -73,8 +105,38 @@ const Question = ({ question }) => {
             <p className="ml-2">{formatNumber(likesCount)}</p>
           </div>
         </div>
-        <div>
+        <div className="flex gap-2 sm:gap-4 items-center">
           <AuthorInfo author={author} />
+          { user.id === Number(author.id) &&
+            <Dropdown>
+              <DropdownTrigger>
+                <Button variant="light" className="min-w-0 px-0">
+                  <CiMenuKebab size="1.4em" className="cursor-pointer" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                onAction={handleQuestionAction}
+                variant="faded"
+                aria-label="Dropdown menu with description"
+              >
+                <DropdownItem
+                  key="edit"
+                  showDivider
+                  startContent={<MdEdit size="1.3em" />}
+                >
+                  Редактировать
+                </DropdownItem>
+                <DropdownItem
+                  key="delete"
+                  className="text-danger"
+                  color="danger"
+                  startContent={<FaRegTrashAlt size="1.3em" />}
+                >
+                  Удалить
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          }
         </div>
       </div>
       {tags.length > 0 && (
@@ -97,6 +159,7 @@ const Question = ({ question }) => {
 
 Question.propTypes = {
   question: PropTypes.object,
+  refetch: PropTypes.func
 };
 
 export default Question;

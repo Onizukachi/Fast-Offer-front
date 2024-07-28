@@ -20,15 +20,13 @@ const QuestionsPage = () => {
   const hasMoreRef = useRef(false);
   const cursorRef = useRef(null);
 
-  const resetPageAndData = () => {
+  const cleanRefetch = () => {
     setQuestionsData([]);
     cursorRef.current = null;
-  };
-
-  const handleSearch = useCallback(() => {
-    resetPageAndData();
     refetch();
-  }, []);
+  }
+
+  const handleSearch = useCallback(() => { cleanRefetch() }, []);
 
   const debouncedSearch = useMemo(() => {
     return debounce(handleSearch, 500);
@@ -49,6 +47,7 @@ const QuestionsPage = () => {
       ).then((data) => {
         hasMoreRef.current = data.meta.has_next;
         cursorRef.current = data.meta.next_cursor;
+        console.log(data)
         setQuestionsData((prevState) =>
           prevState.concat(deserialize(data).data),
         );
@@ -102,7 +101,7 @@ const QuestionsPage = () => {
         }
       >
         {questionsData.map((question) => {
-          return <Question key={question.id} question={question} />;
+          return <Question key={question.id} question={question} refetch={cleanRefetch} />;
         })}
       </InfiniteScroll>
     </div>
