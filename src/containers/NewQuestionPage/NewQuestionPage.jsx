@@ -2,22 +2,33 @@ import ReactQuill from "react-quill";
 import { useMemo, useRef, useState, useCallback } from "react";
 import hljs from "highlight.js";
 import { useMutation, useQuery } from "react-query";
-import { gradesQuery, positionsQuery, tagsQuery, createQuestionQuery } from "./queries";
+import {
+  gradesQuery,
+  positionsQuery,
+  tagsQuery,
+  createQuestionQuery,
+} from "./queries";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
 import { getPositionImageUrl } from "@utils/imageUtil";
 import { showToast } from "@utils/toast.js";
 import { ReactTags } from "react-tag-autocomplete";
+import { useNavigate } from "react-router-dom";
+import { formatErrors } from "@utils/formatErrors";
 
 const NewQuestionPage = () => {
+  const navigate = useNavigate();
   const [editorContent, setEditorContent] = useState("");
   const [editorPlainText, setEditorPlainText] = useState("");
-  const [answerErrors, setAnswerErrors] = useState([]);
+  const [questionErrors, setQuestionErrors] = useState({
+    body: [],
+    grade: [],
+    positions: [],
+  });
   const [grades, setGrades] = useState([]);
   const [positions, setPositions] = useState([]);
   const [tags, setTags] = useState([]);
   const quillRef = useRef(null);
-  const [values, setValues] = useState(new Set([]));
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedGradeId, setSelectedGradeId] = useState(null);
   const [selectedPositionIds, setSelectedPositionIds] = useState([]);
@@ -66,22 +77,29 @@ const NewQuestionPage = () => {
   const formParams = () => {
     return {
       body: getUnprivilegedEditor()?.getHTML(),
-      grade_id: selectedGradeId,
-      tags: selectedTags.map((tag) => tag.label),
-      position_ids: Array.from(selectedPositionIds).filter((el) => el !== '')
-    }
-  }
+      it_grades_id: selectedGradeId,
+      tag_list: selectedTags.map((tag) => tag.label),
+      position_ids: Array.from(selectedPositionIds).filter((el) => el !== ""),
+    };
+  };
 
   const { mutate } = useMutation({
-    mutationFn: () => createQuestionQuery(formParams),
+    mutationFn: () => createQuestionQuery(formParams()),
     onSuccess: () => {
-      console.log('sasdsadsadsadsadsds')
+      showToast("Вопрос создан");
+      navigate("/questions", { replace: false });
     },
     onError: (error) => {
-      console.log(error.response.data);
+      setQuestionErrors((prevErrors) => {
+        const updatedErrors = { ...prevErrors };
+        Object.keys(prevErrors).forEach((key) => {
+          updatedErrors[key] = error.response.data[key] || [];
+        });
+
+        return updatedErrors;
+      });
     },
   });
-
 
   const getUnprivilegedEditor = () => {
     if (!quillRef.current) return;
@@ -89,11 +107,6 @@ const NewQuestionPage = () => {
     const editor = quillRef.current.getEditor();
     return quillRef.current.makeUnprivilegedEditor(editor);
   };
-
-  // console.log(getUnprivilegedEditor()?.getHTML())
-  // console.log(selectedTags)
-  // console.log(selectedGradeId)
-  // console.log(selectedPositionIds)
 
   const handleEditorChange = (content, editor) => {
     setEditorPlainText(editor.getText());
@@ -119,14 +132,14 @@ const NewQuestionPage = () => {
     };
   }, []);
 
-  const onAdd = useCallback(
+  const onAddTag = useCallback(
     (newTag) => {
       setSelectedTags([...selectedTags, newTag]);
     },
     [selectedTags],
   );
 
-  const onDelete = useCallback(
+  const onDeleteTag = useCallback(
     (tagIndex) => {
       setSelectedTags(selectedTags.filter((_, i) => i !== tagIndex));
     },
@@ -138,22 +151,28 @@ const NewQuestionPage = () => {
   const onTagValidate = useCallback((value) => tagIsValid(value), []);
 
   const validateQuestion = () => {
-    console.log(selectedTags)
     return (
       editorPlainText.length > 1 &&
       selectedGradeId &&
-      Array.from(selectedPositionIds).filter((el) => el !== '').length > 0
+      Array.from(selectedPositionIds).filter((el) => el !== "").length > 0
     );
   };
-
-  const handleFormSubmit = () => {
-    mutate()
-  }
 
   return (
     <div className="flex flex-col">
       <h1 className="text-3xl text-center mb-6">Задать вопрос</h1>
       <div className="flex flex-col gap-6">
+        {questionErrors.body.length > 0 && (
+          <div className="mt-4 text-danger">
+            <ul className="list-disc text-danger">
+              {formatErrors("Вопрос", questionErrors.body).map(
+                (error, index) => {
+                  return <li key={index}>{error}</li>;
+                },
+              )}
+            </ul>
+          </div>
+        )}
         <ReactQuill
           className="grow"
           theme="snow"
@@ -168,6 +187,11 @@ const NewQuestionPage = () => {
         <div className="flex flex-wrap gap-6">
           <Select
             label="Уровень сложности"
+            isInvalid={questionErrors.grade.length > 0}
+            errorMessage={formatErrors(
+              "Уровень сложности",
+              questionErrors.grade,
+            ).join(". ")}
             isRequired
             labelPlacement="outside"
             placeholder="Выберите уровень"
@@ -181,6 +205,10 @@ const NewQuestionPage = () => {
           </Select>
           <Select
             label="Языки программирования"
+            isInvalid={questionErrors.positions.length > 0}
+            errorMessage={formatErrors("Язык", questionErrors.positions).join(
+              ". ",
+            )}
             isRequired
             labelPlacement="outside"
             selectionMode="multiple"
@@ -215,8 +243,8 @@ const NewQuestionPage = () => {
           placeholderText="Создайте или выберите теги"
           newOptionText={"Добавить %value%"}
           isInvalid={false}
-          onAdd={onAdd}
-          onDelete={onDelete}
+          onAdd={onAddTag}
+          onDelete={onDeleteTag}
           onValidate={onTagValidate}
           selected={selectedTags}
           suggestions={tags.map((tag) => {
@@ -224,7 +252,7 @@ const NewQuestionPage = () => {
           })}
         />
         <Button
-          onClick={handleFormSubmit}
+          onClick={() => mutate()}
           className="w-44"
           color="primary"
           size="lg"

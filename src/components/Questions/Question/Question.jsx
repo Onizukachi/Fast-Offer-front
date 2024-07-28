@@ -40,7 +40,10 @@ const Question = ({ question }) => {
           to={`/questions/${question.id}`}
           className="font-bold text-xl hover:opacity-80"
         >
-          {question.body}
+          <div
+            id="entity"
+            dangerouslySetInnerHTML={{ __html: question.body }}
+          />
         </NavLink>
       </div>
       <div className="flex justify-between gap-4 mt-2 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
@@ -76,7 +79,7 @@ const Question = ({ question }) => {
       </div>
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-4 sm:gap-2 sm:mt-1 mt-3">
-          <Chip size="sm" color='primary' className="cursor-pointer">
+          <Chip size="sm" color="primary" className="cursor-pointer">
             {question.grade.grade}
           </Chip>
           {tags.map((tag) => {
