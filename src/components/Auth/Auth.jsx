@@ -6,8 +6,8 @@ import {
 } from "@nextui-org/react";
 import { MdAccountCircle } from "react-icons/md";
 import { IoMdExit } from "react-icons/io";
-import LoginModal from "@components/Header/Auth/LoginModal/index.js";
-import SignUpModal from "@components/Header/Auth/SignUpModal/index.js";
+import LoginModal from "@components/Auth/LoginModal/index.js";
+import SignUpModal from "@components/Auth/SignUpModal/index.js";
 import AuthContext from "@context/AuthContext.jsx";
 import {useContext} from "react";
 import { useNavigate } from "react-router-dom";

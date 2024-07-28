@@ -1,9 +1,7 @@
 import "./Comment.module.css";
-import {useContext, useEffect, useState} from "react";
+import { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { gravatarUrl } from "@utils/gravatarUrl";
 import { BiSolidCommentDetail } from "react-icons/bi";
-import { CiMenuKebab } from "react-icons/ci";
 import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
 import {
@@ -14,17 +12,10 @@ import {
 import { useMutation } from "react-query";
 import { showToast } from "@utils/toast";
 import { Textarea } from "@nextui-org/input";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Button,
-} from "@nextui-org/react";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
-import AuthContext from "@context/AuthContext.jsx";
-import AuthorInfo from "@components/AuthorInfo/index.js";
+import { Button } from "@nextui-org/react";
+import AuthContext from "@context/AuthContext";
+import AuthorInfo from "@components/AuthorInfo";
+import ActionMenu from "@components/ActionMenu";
 
 const Comment = ({
   comment,
@@ -118,7 +109,7 @@ const Comment = ({
     updateCommentMutation.mutate();
   };
 
-  const handleAction = (action) => {
+  const handleCommentAction = (action) => {
     switch (action) {
       case "delete":
         deleteCommentMutation.mutate();
@@ -141,36 +132,9 @@ const Comment = ({
           </span>
           <div className="flex gap-2 sm:gap-4 items-center">
             <AuthorInfo author={author} />
-            { user.id === Number(author.id) &&
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button variant="light" className="min-w-0 px-0">
-                    <CiMenuKebab size="1.4em" className="cursor-pointer" />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  onAction={handleAction}
-                  variant="faded"
-                  aria-label="Dropdown menu with description"
-                >
-                  <DropdownItem
-                    key="edit"
-                    showDivider
-                    startContent={<MdEdit size="1.3em" />}
-                  >
-                    Редактировать
-                  </DropdownItem>
-                  <DropdownItem
-                    key="delete"
-                    className="text-danger"
-                    color="danger"
-                    startContent={<FaRegTrashAlt size="1.3em" />}
-                  >
-                    Удалить
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            }
+            {user && user.id === Number(author.id) && (
+              <ActionMenu onAction={handleCommentAction} />
+            )}
           </div>
         </div>
         {!editMode ? (
@@ -212,7 +176,6 @@ const Comment = ({
             </div>
           </div>
         )}
-
         <div className="flex justify-between gap-4 mt-4 sm:gap-0 items-start sm:items-center flex-col sm:flex-row">
           <div className="flex -ml-3">
             <div

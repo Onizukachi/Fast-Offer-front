@@ -51,7 +51,9 @@ const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
 
   return (
     <div>
-      <button className='' onClick={handleLike}>{isLiked ? "❤️" : "🤍"}</button>
+      <button className="" onClick={handleLike}>
+        {isLiked ? "❤️" : "🤍"}
+      </button>
     </div>
   );
 };

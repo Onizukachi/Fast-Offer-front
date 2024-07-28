@@ -1,23 +1,22 @@
 import { useMutation, useQuery } from "react-query";
-import { useContext, useState, useMemo, useRef } from "react";
+import { useContext, useState, useRef } from "react";
 import { fetchQuestion } from "./queries";
 import { Divider, Spinner } from "@nextui-org/react";
-import Question from "@components/Questions/Question";
+import Question from "@components/Question";
 import { useParams } from "react-router-dom";
 import AuthContext from "@context/AuthContext";
 import { gravatarUrl } from "@utils/gravatarUrl";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import hljs from "highlight.js";
 import "highlight.js/styles/monokai-sublime.css";
 import { Button } from "@nextui-org/react";
 import { MdComment } from "react-icons/md";
 import { createAnswerQuery } from "./queries";
 import { showToast } from "@utils/toast";
 import { normalizeCountForm } from "@utils/normalizeCountForm";
-import Answer from "@components/Question/Answer";
+import Answer from "@components/Answer";
 import { UNATHORIZED } from "@constants/toastMessages";
 import { deserialize } from "deserialize-json-api";
+import QuillEditor from "@components/QuillEditor";
 
 const QuestionPage = () => {
   const { user } = useContext(AuthContext);
@@ -27,19 +26,6 @@ const QuestionPage = () => {
   const [editorPlainText, setEditorPlainText] = useState("");
   const [answerErrors, setAnswerErrors] = useState([]);
   const quillRef = useRef(null);
-  hljs.configure({
-    languages: [
-      "javascript",
-      "CSS",
-      "HTML",
-      "java",
-      "ruby",
-      "python",
-      "sql",
-      "json",
-      "php",
-    ],
-  });
 
   const resetAnswerEditor = () => {
     setEditorContent("");
@@ -111,25 +97,6 @@ const QuestionPage = () => {
     return editorPlainText.length > 1;
   };
 
-  const modules = useMemo(() => {
-    return {
-      syntax: {
-        highlight: (text) => hljs.highlightAuto(text).value,
-      },
-      toolbar: {
-        container: [
-          [{ header: [1, 2, false] }],
-          ["bold", "italic", "underline", "strike", "blockquote", "code-block"],
-          [{ list: "ordered" }, { list: "bullet" }, "link", { align: [] }],
-          ["clean"],
-        ],
-      },
-      clipboard: {
-        matchVisual: false,
-      },
-    };
-  }, []);
-
   return (
     <div className="flex flex-col gap-6">
       {isLoading && <Spinner size="lg" color="primary" />}
@@ -148,26 +115,23 @@ const QuestionPage = () => {
               </div>
             )}
             <div className="mt-4 flex flex-row">
-              <a className="hidden sm:flex items-center basis-28" href="#">
-                <img
-                  className="ml-0 mr-4 sm:mx-4 w-12 h-12 object-cover rounded-full sm:block"
-                  src={gravatarUrl(user.gravatar_hash)}
-                  alt="avatar"
-                />
-              </a>
-              <ReactQuill
-                className="h-34 grow"
-                theme="snow"
-                modules={modules}
+              {user && (
+                <a className="hidden sm:flex items-center basis-28" href="#">
+                  <img
+                    className="ml-0 mr-4 sm:mx-4 w-12 h-12 object-cover rounded-full sm:block"
+                    src={gravatarUrl(user.gravatar_hash)}
+                    alt="avatar"
+                  />
+                </a>
+              )}
+              <QuillEditor
                 value={editorContent}
-                onChange={(content, delta, source, editor) => {
-                  handleEditorChange(content, editor);
-                }}
-                ref={quillRef}
+                onChange={handleEditorChange}
+                quillRef={quillRef}
                 placeholder={"Введите текст ответа"}
               />
             </div>
-            <div className="ml-0 sm:ml-28 mt-20 flex flex-row gap-4 items-center flex-wrap">
+            <div className={`ml-0 ${user && 'sm:ml-28'} mt-20 flex flex-row gap-4 items-center flex-wrap`}>
               <Button
                 size="lg"
                 startContent={<MdComment size="1.4em" />}

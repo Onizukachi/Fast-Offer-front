@@ -11,8 +11,8 @@ import {
 import PropTypes from "prop-types";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "@context/AuthContext.jsx";
-import { showToast } from "@utils/toast";
-import { SUCCESS_SIGN_UP } from "@constants/toastMessages";
+import { showToast } from "@utils/toast.js";
+import { SUCCESS_SIGN_UP } from "@constants/toastMessages.js";
 import axios from "axios";
 import { API_BACK_BASE_URL } from "@constants/api.js";
 import { useNavigate } from "react-router-dom";

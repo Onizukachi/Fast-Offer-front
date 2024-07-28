@@ -1,6 +1,4 @@
-import ReactQuill from "react-quill";
-import { useMemo, useRef, useState, useCallback } from "react";
-import hljs from "highlight.js";
+import { useRef, useState, useCallback } from "react";
 import { useMutation, useQuery } from "react-query";
 import {
   gradesQuery,
@@ -15,6 +13,7 @@ import { showToast } from "@utils/toast.js";
 import { ReactTags } from "react-tag-autocomplete";
 import { useNavigate } from "react-router-dom";
 import { formatErrors } from "@utils/formatErrors";
+import QuillEditor from "@components/QuillEditor";
 
 const NewQuestionPage = () => {
   const navigate = useNavigate();
@@ -32,20 +31,6 @@ const NewQuestionPage = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedGradeId, setSelectedGradeId] = useState(null);
   const [selectedPositionIds, setSelectedPositionIds] = useState([]);
-
-  hljs.configure({
-    languages: [
-      "javascript",
-      "CSS",
-      "HTML",
-      "java",
-      "ruby",
-      "python",
-      "sql",
-      "json",
-      "php",
-    ],
-  });
 
   useQuery(
     `grades`,
@@ -113,25 +98,6 @@ const NewQuestionPage = () => {
     setEditorContent(editor.getHTML());
   };
 
-  const modules = useMemo(() => {
-    return {
-      syntax: {
-        highlight: (text) => hljs.highlightAuto(text).value,
-      },
-      toolbar: {
-        container: [
-          [{ header: [1, 2, false] }],
-          ["bold", "italic", "underline", "strike", "blockquote", "code-block"],
-          [{ list: "ordered" }, { list: "bullet" }, "link", { align: [] }],
-          ["clean"],
-        ],
-      },
-      clipboard: {
-        matchVisual: false,
-      },
-    };
-  }, []);
-
   const onAddTag = useCallback(
     (newTag) => {
       setSelectedTags([...selectedTags, newTag]);
@@ -173,15 +139,10 @@ const NewQuestionPage = () => {
             </ul>
           </div>
         )}
-        <ReactQuill
-          className="grow"
-          theme="snow"
-          modules={modules}
+        <QuillEditor
           value={editorContent}
-          onChange={(content, delta, source, editor) => {
-            handleEditorChange(content, editor);
-          }}
-          ref={quillRef}
+          onChange={handleEditorChange}
+          quillRef={quillRef}
           placeholder={"Введите текст вопроса"}
         />
         <div className="flex flex-wrap gap-6">

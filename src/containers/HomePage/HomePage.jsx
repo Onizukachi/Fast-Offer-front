@@ -14,7 +14,7 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-wrap gap-12 justify-between">
-      { isLoading && <Spinner size="lg" color="primary" /> }
+      {isLoading && <Spinner size="lg" color="primary" />}
       {isSuccess &&
         data["data"].map((el) => {
           return (

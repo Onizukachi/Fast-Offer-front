@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Auth from "@components/Header/Auth";
+import Auth from "@components/Auth";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Navbar,

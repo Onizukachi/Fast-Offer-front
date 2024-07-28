@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { fetchQuestions } from "./queries";
-import Question from "@components/Questions/Question";
+import Question from "@components/Question";
 import { deserialize } from "deserialize-json-api";
 import InfiniteScroll from "react-infinite-scroll-component";
 import BeatLoader from "react-spinners/BeatLoader";
@@ -47,7 +47,6 @@ const QuestionsPage = () => {
       ).then((data) => {
         hasMoreRef.current = data.meta.has_next;
         cursorRef.current = data.meta.next_cursor;
-        console.log(data)
         setQuestionsData((prevState) =>
           prevState.concat(deserialize(data).data),
         );

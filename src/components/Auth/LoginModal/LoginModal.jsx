@@ -15,8 +15,8 @@ import AuthContext from "@context/AuthContext.jsx";
 import axios from "axios";
 import { API_BACK_BASE_URL } from "@constants/api.js";
 import { useNavigate } from "react-router-dom";
-import { showToast } from "@utils/toast";
-import { SUCCESS_LOGIN } from "@constants/toastMessages";
+import { showToast } from "@utils/toast.js";
+import { SUCCESS_LOGIN } from "@constants/toastMessages.js";
 
 const LoginModal = ({ isOpen, onOpenChange, signUpOnOpen }) => {
   const navigate = useNavigate();

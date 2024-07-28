@@ -1,28 +1,21 @@
 import "./Answer.module.css";
-import {useContext, useEffect, useState} from "react";
+import { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { BiSolidCommentDetail } from "react-icons/bi";
-import LikeButton from "@components/LikeButton";
+import LikeButton from "@components/LikeButton/index.js";
 import moment from "moment/min/moment-with-locales";
-import { normalizeCountForm } from "@utils/normalizeCountForm";
-import Comment from "@components/Comment";
-import { commentsQuery, deleteAnswerQuery } from "./queries";
+import { normalizeCountForm } from "@utils/normalizeCountForm.js";
+import Comment from "@components/Comment/index.js";
+import { commentsQuery, deleteAnswerQuery } from "./queries.js";
 import { useMutation, useQuery } from "react-query";
-import { createCommentQuery } from "@components/Comment/queries";
-import { showToast } from "@utils/toast";
+import { createCommentQuery } from "@components/Comment/queries.js";
+import { showToast } from "@utils/toast.js";
 import { Textarea } from "@nextui-org/input";
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-} from "@nextui-org/react";
-import useCommentTree from "@utils/useCommentTree";
-import { CiMenuKebab } from "react-icons/ci";
-import { FaRegTrashAlt } from "react-icons/fa";
-import AuthContext from "@context/AuthContext";
-import AuthorInfo from "@components/AuthorInfo";
+import { Button } from "@nextui-org/react";
+import useCommentTree from "@utils/useCommentTree.js";
+import AuthContext from "@context/AuthContext.jsx";
+import AuthorInfo from "@components/AuthorInfo/index.js";
+import ActionMenu from "@components/ActionMenu/index.js";
 
 const Answer = ({ answer, questionId, onDelete }) => {
   const { user } = useContext(AuthContext);
@@ -121,29 +114,9 @@ const Answer = ({ answer, questionId, onDelete }) => {
         </span>
         <div className="flex gap-2 sm:gap-4 items-center">
           <AuthorInfo author={answer.author} />
-          { user.id === Number(answer.author.id) &&
-            <Dropdown>
-              <DropdownTrigger>
-                <Button variant="light" className="min-w-0 px-0">
-                  <CiMenuKebab size="1.4em" className="cursor-pointer" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                onAction={handleAnswerAction}
-                variant="faded"
-                aria-label="Dropdown menu with description"
-              >
-                <DropdownItem
-                  key="delete"
-                  className="text-danger"
-                  color="danger"
-                  startContent={<FaRegTrashAlt size="1.3em" />}
-                >
-                  Удалить
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          }
+          {user && user.id === Number(answer.author.id) && (
+            <ActionMenu onAction={handleAnswerAction} showEdit={false} />
+          )}
         </div>
       </div>
       <div

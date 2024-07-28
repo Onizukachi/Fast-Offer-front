@@ -1,5 +1,3 @@
-import styles from './InterviewsPage.module.css'
-
 const InterviewsPage = () => {
   return (
     <>
