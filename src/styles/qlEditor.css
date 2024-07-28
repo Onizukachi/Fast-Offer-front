@@ -19,3 +19,15 @@
     word-wrap: break-word;
     font-weight: normal;
 }
+
+@media (max-width: 800px) {
+    #entity pre.ql-syntax {
+        font-size: medium;
+    }
+}
+
+@media (max-width: 500px) {
+    #entity pre.ql-syntax {
+        font-size: small;
+    }
+}
