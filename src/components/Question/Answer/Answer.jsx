@@ -1,7 +1,6 @@
 import "./Answer.module.css";
-import { useEffect, useState } from "react";
+import {useContext, useEffect, useState} from "react";
 import PropTypes from "prop-types";
-import { gravatarUrl } from "@utils/gravatarUrl";
 import { BiSolidCommentDetail } from "react-icons/bi";
 import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
@@ -19,11 +18,14 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/react";
-import useCommentTree from "@components/Comment/useCommentTree";
+import useCommentTree from "@utils/useCommentTree";
 import { CiMenuKebab } from "react-icons/ci";
 import { FaRegTrashAlt } from "react-icons/fa";
+import AuthContext from "@context/AuthContext";
+import AuthorInfo from "@components/AuthorInfo";
 
 const Answer = ({ answer, questionId, onDelete }) => {
+  const { user } = useContext(AuthContext);
   const [likesCount, setLikesCount] = useState(answer.likes_count);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
@@ -118,37 +120,30 @@ const Answer = ({ answer, questionId, onDelete }) => {
           {moment(answer.created_at).format("LL")}
         </span>
         <div className="flex gap-2 sm:gap-4 items-center">
-          <a className="flex items-center" href="#">
-            <img
-              className="ml-0 mr-4 sm:mx-4 w-10 h-10 object-cover rounded-full sm:block"
-              src={gravatarUrl(answer.author.gravatar_hash)}
-              alt="avatar"
-            />
-            <h1 className="text-medium font-bold hidden sm:block">
-              {answer.author.nickname}
-            </h1>
-          </a>
-          <Dropdown>
-            <DropdownTrigger>
-              <Button variant="light" className="min-w-0 px-0">
-                <CiMenuKebab size="1.4em" className="cursor-pointer" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              onAction={handleAnswerAction}
-              variant="faded"
-              aria-label="Dropdown menu with description"
-            >
-              <DropdownItem
-                key="delete"
-                className="text-danger"
-                color="danger"
-                startContent={<FaRegTrashAlt size="1.3em" />}
+          <AuthorInfo author={answer.author} />
+          { user.id === Number(answer.author.id) &&
+            <Dropdown>
+              <DropdownTrigger>
+                <Button variant="light" className="min-w-0 px-0">
+                  <CiMenuKebab size="1.4em" className="cursor-pointer" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                onAction={handleAnswerAction}
+                variant="faded"
+                aria-label="Dropdown menu with description"
               >
-                Удалить
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+                <DropdownItem
+                  key="delete"
+                  className="text-danger"
+                  color="danger"
+                  startContent={<FaRegTrashAlt size="1.3em" />}
+                >
+                  Удалить
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          }
         </div>
       </div>
       <div
