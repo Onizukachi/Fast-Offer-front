@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import {Chip} from "@nextui-org/react";
+import { Chip } from "@nextui-org/react";
 import { useEffect, useState, useMemo, useContext } from "react";
 import moment from "moment/min/moment-with-locales";
 import { BiSolidCommentDetail } from "react-icons/bi";
@@ -55,7 +55,7 @@ const Question = ({ question, refetch }) => {
         deleteQuestionMutation.mutate();
         break;
       case "edit":
-        // TO DO
+        navigate(`/questions/${question.id}/edit`);
         break;
     }
   };

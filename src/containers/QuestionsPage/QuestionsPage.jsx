@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import { useState, useCallback, useMemo, useRef } from "react";
-import { fetchQuestions } from "./queries";
+import { questionsQuery } from "./queries";
 import Question from "@components/Question";
 import { deserialize } from "deserialize-json-api";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -40,7 +40,7 @@ const QuestionsPage = () => {
   const { isLoading, refetch } = useQuery(
     `questions`,
     () =>
-      fetchQuestions(
+      questionsQuery(
         cursorRef.current,
         LIMIT_PER_PAGE,
         searchTermRef.current,

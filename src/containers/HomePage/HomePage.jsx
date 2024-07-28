@@ -1,6 +1,6 @@
 import styles from "./HomePage.module.css";
 import { useQuery } from "react-query";
-import { fetchPositions } from "./queries";
+import { positionsQuery } from "./queries";
 import { getPositionImageUrl } from "@utils/imageUtil";
 import { NavLink } from "react-router-dom";
 import { Spinner } from "@nextui-org/react";
@@ -8,7 +8,7 @@ import { Spinner } from "@nextui-org/react";
 const HomePage = () => {
   const { data, isSuccess, isLoading } = useQuery(
     `positions`,
-    () => fetchPositions().then((data) => data),
+    () => positionsQuery().then((data) => data),
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 

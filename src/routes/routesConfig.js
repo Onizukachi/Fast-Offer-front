@@ -4,6 +4,7 @@ import InterviewsPage from '@containers/InterviewsPage'
 import QuestionsPage from "@containers/QuestionsPage";
 import QuestionPage from "@containers/QuestionPage";
 import NewQuestionPage from "@containers/NewQuestionPage";
+import EditQuestionPage from "@containers/EditQuestionPage";
 
 const routesConfig = [
   {
@@ -17,6 +18,10 @@ const routesConfig = [
   {
     path: '/questions/new',
     element: NewQuestionPage,
+  },
+  {
+    path: '/questions/:id/edit',
+    element: EditQuestionPage,
   },
   {
     path: '/questions/:id',

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "react-query";
 import { useContext, useState, useRef } from "react";
-import { fetchQuestion } from "./queries";
+import { questionQuery } from "./queries";
 import { Divider, Spinner } from "@nextui-org/react";
 import Question from "@components/Question";
 import { useParams } from "react-router-dom";
@@ -36,7 +36,7 @@ const QuestionPage = () => {
   const { isLoading } = useQuery(
     `question`,
     () =>
-      fetchQuestion(id).then((data) => {
+      questionQuery(id).then((data) => {
         setQuestion(deserialize(data).data);
       }),
     { refetchInterval: false, refetchOnWindowFocus: false },
