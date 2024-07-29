@@ -10,6 +10,8 @@ import { IoSearchOutline } from "react-icons/io5";
 import { debounce } from "lodash";
 import { Button } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
+import {showToast} from "@utils/toast.js";
+import {UNPERMITTED} from "@constants/toastMessages.js";
 
 const LIMIT_PER_PAGE = 10;
 
@@ -52,6 +54,7 @@ const QuestionsPage = () => {
         );
       }).catch((error) => {
         console.log(error.response.data)
+        if(error.response.status === 401) showToast(UNPERMITTED, 'warning')
       }),
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
