@@ -50,6 +50,8 @@ const QuestionsPage = () => {
         setQuestionsData((prevState) =>
           prevState.concat(deserialize(data).data),
         );
+      }).catch((error) => {
+        console.log(error.response.data)
       }),
     { refetchInterval: false, refetchOnWindowFocus: false },
   );

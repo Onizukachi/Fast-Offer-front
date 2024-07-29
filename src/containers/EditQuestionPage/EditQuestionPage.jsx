@@ -218,7 +218,7 @@ const EditQuestionPage = () => {
                   startContent={
                     <img
                       className="w-6 h-6"
-                      src={getPositionImageUrl(position.image_filename)}
+                      src={position.image_url}
                       alt={position.title}
                     ></img>
                   }
