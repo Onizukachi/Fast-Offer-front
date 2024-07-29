@@ -19,8 +19,6 @@ const HomePage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
-  console.log(positions)
-
   return (
     <div className="flex flex-wrap gap-12 justify-between">
       {isLoading && <Spinner size="lg" color="primary" />}

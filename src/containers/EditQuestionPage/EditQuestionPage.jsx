@@ -1,10 +1,7 @@
 import { useRef, useState, useCallback } from "react";
 import { useMutation, useQuery } from "react-query";
-import {
-  gradesQuery,
-  positionsQuery,
-  tagsQuery,
-} from "@containers/NewQuestionPage/queries";
+import { tagsQuery } from "@containers/NewQuestionPage/queries";
+import { positionsQuery } from '@queries/positionsQuery'
 import { updateQuestionQuery } from "./queries";
 import { questionQuery } from "@containers/QuestionPage/queries";
 import { Button, Select, SelectItem } from "@nextui-org/react";

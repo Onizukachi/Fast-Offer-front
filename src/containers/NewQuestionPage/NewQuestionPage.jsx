@@ -1,11 +1,8 @@
 import { useRef, useState, useCallback } from "react";
 import { useMutation, useQuery } from "react-query";
-import {
-  gradesQuery,
-  positionsQuery,
-  tagsQuery,
-  createQuestionQuery,
-} from "./queries";
+import { tagsQuery, createQuestionQuery } from "./queries";
+import { positionsQuery } from '@queries/positionsQuery'
+import { gradesQuery } from '@queries/gradesQuery'
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
 import { showToast } from "@utils/toast.js";

@@ -11,6 +11,7 @@ export default defineConfig({
       '@containers': path.resolve(__dirname, './src/containers'),
       '@constants': path.resolve(__dirname, './src/constants'),
       '@services': path.resolve(__dirname, './src/services'),
+      '@queries': path.resolve(__dirname, './src/queries'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@styles': path.resolve(__dirname, './src/styles'),
       '@static': path.resolve(__dirname, './src/static'),
