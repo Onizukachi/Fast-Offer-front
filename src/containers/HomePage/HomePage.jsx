@@ -1,28 +1,37 @@
 import styles from "./HomePage.module.css";
+import { useState } from 'react'
 import { useQuery } from "react-query";
 import { positionsQuery } from "./queries";
-import { getPositionImageUrl } from "@utils/imageUtil";
 import { NavLink } from "react-router-dom";
 import { Spinner } from "@nextui-org/react";
+import { deserialize } from "deserialize-json-api";
 
 const HomePage = () => {
-  const { data, isSuccess, isLoading } = useQuery(
+  const [positions, setPositions] = useState([])
+
+  const { isSuccess, isLoading } = useQuery(
     `positions`,
-    () => positionsQuery().then((data) => data),
+    () =>
+      positionsQuery(
+      ).then((data) => {
+        setPositions(deserialize(data).data)
+      }),
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
+
+  console.log(positions)
 
   return (
     <div className="flex flex-wrap gap-12 justify-between">
       {isLoading && <Spinner size="lg" color="primary" />}
       {isSuccess &&
-        data["data"].map((el) => {
+        positions.map((el) => {
           return (
             <div key={el.id} className="flex items-center">
               <NavLink to="/">
                 <img
                   className={styles.logo}
-                  src={getPositionImageUrl(el.image_filename)}
+                  src={el.image_url}
                   alt={el.title}
                 ></img>
               </NavLink>

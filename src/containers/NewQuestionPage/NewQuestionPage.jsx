@@ -8,7 +8,6 @@ import {
 } from "./queries";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
-import { getPositionImageUrl } from "@utils/imageUtil";
 import { showToast } from "@utils/toast.js";
 import { ReactTags } from "react-tag-autocomplete";
 import { useNavigate } from "react-router-dom";
@@ -186,7 +185,7 @@ const NewQuestionPage = () => {
                 startContent={
                   <img
                     className="w-6 h-6"
-                    src={getPositionImageUrl(position.image_filename)}
+                    src={position.image_url}
                     alt={position.title}
                   ></img>
                 }

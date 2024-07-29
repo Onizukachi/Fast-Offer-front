@@ -5,11 +5,10 @@ import {
   positionsQuery,
   tagsQuery,
 } from "@containers/NewQuestionPage/queries";
-import { updateQuestionQuery } from "./queries.js";
+import { updateQuestionQuery } from "./queries";
 import { questionQuery } from "@containers/QuestionPage/queries";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
-import { getPositionImageUrl } from "@utils/imageUtil";
 import { showToast } from "@utils/toast";
 import { ReactTags } from "react-tag-autocomplete";
 import { useNavigate, useParams } from "react-router-dom";
