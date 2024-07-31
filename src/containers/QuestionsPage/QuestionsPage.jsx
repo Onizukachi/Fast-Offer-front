@@ -256,15 +256,6 @@ const QuestionsPage = () => {
           />
         </div>
        )}
-      {isLoading && (
-        <div>
-          <BeatLoader
-            className="mt-8 text-center"
-            size="20px"
-            color="#5c7de0"
-          />
-        </div>
-      )}
       <InfiniteScroll
         dataLength={questionsData.length}
         next={refetch}
