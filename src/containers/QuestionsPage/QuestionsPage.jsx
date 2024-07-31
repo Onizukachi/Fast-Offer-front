@@ -1,11 +1,11 @@
 import { useQuery } from "react-query";
-import { useState, useCallback, useRef, useEffect } from "react";
+import {useState, useCallback, useRef, useEffect, useMemo} from "react";
 import { questionsQuery } from "./queries";
 import Question from "@components/Question";
 import { deserialize } from "deserialize-json-api";
 import InfiniteScroll from "react-infinite-scroll-component";
 import BeatLoader from "react-spinners/BeatLoader";
-import { Input, Select, SelectItem, Switch } from "@nextui-org/react";
+import { Input, Switch } from "@nextui-org/react";
 import { IoSearchOutline } from "react-icons/io5";
 import { debounce } from "lodash";
 import { Button } from "@nextui-org/react";
@@ -14,9 +14,11 @@ import { showToast } from "@utils/toast";
 import { UNPERMITTED } from "@constants/toastMessages";
 import { positionsQuery } from "@queries/positionsQuery";
 import { gradesQuery } from "@queries/gradesQuery";
+import FiltersBlock from "@components/Questions/FiltersBlock";
+import Orders from "@components/Questions/Orders/Orders.jsx";
 
 const LIMIT_PER_PAGE = 10;
-
+const SORT_FIELDS = ["date", "popular"];
 const ORDER_OPTIONS = [
   { key: "desc", label: "По возрастанию" },
   { key: "asc", label: "По убыванию" },
@@ -34,6 +36,10 @@ const QuestionsPage = () => {
   );
   const [selectedPositionIds, setSelectedPositionIds] = useState(
     searchParams.getAll("position_ids") || [],
+  );
+  const [sortField, setSortField] = useState(searchParams.get("sort") || "");
+  const [sortOrder, setSortOrder] = useState(
+    searchParams.get("order") || "asc",
   );
   const hasMoreRef = useRef(false);
   const cursorRef = useRef(null);
@@ -57,19 +63,37 @@ const QuestionsPage = () => {
     } else {
       setSearchTerm("");
     }
+
+    if (
+      searchParams.get("sort") &&
+      SORT_FIELDS.includes(searchParams.get("sort"))
+    ) {
+      setSortField(searchParams.get("sort"));
+    } else {
+      setSortField("");
+    }
+
+    if (
+      searchParams.get("order") &&
+      ORDER_OPTIONS.map((el) => el.key).includes(searchParams.get("order"))
+    ) {
+      setSortOrder(searchParams.get("order"));
+    } else {
+      setSortOrder("asc");
+    }
   }, [searchParams]);
 
   const toggleFilters = () => setShowFilters(!showFilters);
 
-  const resetMeta = () => {
+  const resetMeta = useCallback(() => {
     setQuestionsData([]);
     cursorRef.current = null;
-  };
+  });
 
-  const cleanRefetch = () => {
+  const cleanRefetch = useCallback(() => {
     resetMeta();
     refetch();
-  };
+  });
 
   const handleSearch = useCallback(
     debounce((searchTerm) => {
@@ -89,7 +113,7 @@ const QuestionsPage = () => {
     handleSearch(searchTerm);
   };
 
-  const handleGradeChange = (e) => {
+  const handleGradeChange = useCallback((e) => {
     resetMeta();
     setSearchParams(
       (prev) => {
@@ -98,9 +122,9 @@ const QuestionsPage = () => {
       },
       { replace: true },
     );
-  };
+  }, [searchParams]);
 
-  const handlePositionsChange = (positionIds) => {
+  const handlePositionsChange = useCallback((positionIds) => {
     resetMeta();
     setSearchParams(
       (prev) => {
@@ -115,22 +139,22 @@ const QuestionsPage = () => {
       },
       { replace: true },
     );
-  };
+  }, [searchParams]);
 
-  const queryParams = () => {
-    return {
-      after: cursorRef.current,
-      limit: LIMIT_PER_PAGE,
-      query: searchTerm,
-      grade_id: selectedGradeId,
-      position_ids: selectedPositionIds,
-    };
-  };
+  const queryParams = useMemo(() => ({
+    after: cursorRef.current,
+    limit: LIMIT_PER_PAGE,
+    query: searchTerm,
+    grade_id: selectedGradeId,
+    position_ids: selectedPositionIds,
+    sort: sortField,
+    order: sortOrder,
+  }), [searchTerm, selectedGradeId, selectedPositionIds, sortField, sortOrder]);
 
   const { isLoading, refetch } = useQuery(
-    [searchTerm, selectedGradeId, selectedPositionIds],
+    [searchTerm, selectedGradeId, selectedPositionIds, sortField, sortOrder],
     () =>
-      questionsQuery(queryParams())
+      questionsQuery(queryParams)
         .then((data) => {
           hasMoreRef.current = data.meta.has_next;
           cursorRef.current = data.meta.next_cursor;
@@ -163,12 +187,38 @@ const QuestionsPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
+  const handleSortingChange = useCallback((field, direction) => {
+    resetMeta();
+    if (sortField === field && direction === sortOrder) {
+      setSearchParams(
+        (prev) => {
+          prev.set("sort", "");
+          prev.set("order", "asc");
+          return prev;
+        },
+        { replace: true },
+      );
+    } else {
+      setSearchParams(
+        (prev) => {
+          prev.set("sort", field);
+          prev.set("order", direction);
+          return prev;
+        },
+        { replace: true },
+      );
+    }
+  }, [searchParams]);
+
+  console.log("SEXXX")
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-center flex-wrap gap-6">
         <Switch onChange={toggleFilters}>Фильтры</Switch>
         <div className="max-w-2xl w-full">
           <Input
+            isDisabled={isLoading}
             type="search"
             size="lg"
             onValueChange={handleSearchInputChange}
@@ -189,73 +239,23 @@ const QuestionsPage = () => {
       </div>
       {showFilters && (
         <div className="flex flex-wrap gap-6 justify-center mt-3">
-          <Select
-            label="Уровень сложности"
-            defaultSelectedKeys={[selectedGradeId?.toString()]}
-            labelPlacement="outside"
-            placeholder="Выберите уровень"
-            className="max-w-56"
-            disableSelectorIconRotation
-            onChange={handleGradeChange}
-          >
-            {grades.map((grade) => (
-              <SelectItem key={grade.id}>{grade.grade}</SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="Языки программирования"
-            defaultSelectedKeys={selectedPositionIds}
-            labelPlacement="outside"
-            selectionMode="multiple"
-            placeholder="Выберите языки"
-            className="max-w-56"
-            onChange={(e) =>
-              handlePositionsChange(new Set(e.target.value.split(",")))
-            }
-          >
-            {positions.map((position) => (
-              <SelectItem
-                key={position.id}
-                startContent={
-                  <img
-                    className="w-6 h-6"
-                    src={position.image_url}
-                    alt={position.title}
-                  ></img>
-                }
-              >
-                {position.title}
-              </SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="Сортировать по дате"
-            // defaultSelectedKeys={[selectedGradeId?.toString()]}
-            labelPlacement="outside"
-            placeholder="Направление"
-            className="max-w-44"
-            disableSelectorIconRotation
-            onChange={(e) => console.log(e.target.value)}
-          >
-            {ORDER_OPTIONS.map((option) => (
-              <SelectItem key={option.key}>{option.label}</SelectItem>
-            ))}
-          </Select>
-          <Select
-            label="Сортировать по популярности"
-            // defaultSelectedKeys={[selectedGradeId?.toString()]}
-            labelPlacement="outside"
-            placeholder="Направление"
-            className="max-w-56"
-            disableSelectorIconRotation
-            onChange={(e) => console.log(e.target.value)}
-          >
-            {ORDER_OPTIONS.map((option) => (
-              <SelectItem key={option.key}>{option.label}</SelectItem>
-            ))}
-          </Select>
+          <FiltersBlock
+            isLoading={isLoading}
+            selectedGradeId={selectedGradeId}
+            handleGradeChange={handleGradeChange}
+            grades={grades}
+            selectedPositionIds={selectedPositionIds}
+            handlePositionsChange={handlePositionsChange}
+            positions={positions}
+          />
+          <Orders
+            isLoading={isLoading}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            handleSortingChange={handleSortingChange}
+          />
         </div>
-      )}
+       )}
       {isLoading && (
         <div>
           <BeatLoader

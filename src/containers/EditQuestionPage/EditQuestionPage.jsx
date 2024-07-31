@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "react-query";
 import { tagsQuery } from "@containers/NewQuestionPage/queries";
 import { positionsQuery } from '@queries/positionsQuery'
 import { updateQuestionQuery } from "./queries";
+import { gradesQuery} from "@queries/gradesQuery";
 import { questionQuery } from "@containers/QuestionPage/queries";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
