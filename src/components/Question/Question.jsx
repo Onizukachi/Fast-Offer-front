@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Chip } from "@nextui-org/react";
-import { useEffect, useState, useMemo, useContext } from "react";
+import { useMemo, useContext } from "react";
 import moment from "moment/min/moment-with-locales";
 import { BiSolidCommentDetail } from "react-icons/bi";
 import { FaEye } from "react-icons/fa";
@@ -15,16 +15,13 @@ import { deleteQuestionQuery } from "./queries";
 import { showToast } from "@utils/toast.js";
 import { useNavigate } from "react-router-dom";
 import ActionMenu from "@components/ActionMenu";
+import useLikeState from "@utils/useLikeState";
 
 const Question = ({ question, refetch }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { author, positions, tags } = question;
-  const [likesCount, setLikesCount] = useState(question.likes_count);
-
-  useEffect(() => {
-    setLikesCount(question.likes_count);
-  }, [question.likes_count]);
+  const [likeState, handleLikeUpdate] = useLikeState(question);
 
   const formattedDate = useMemo(
     () => moment(question.created_at).format("LL"),
@@ -96,12 +93,12 @@ const Question = ({ question, refetch }) => {
           </div>
           <div className="flex">
             <LikeButton
-              setLikesCount={setLikesCount}
-              initState={question.liked}
               likeableId={question.id}
-              likeableType={"Question"}
+              likeableType="Question"
+              isLiked={likeState.isLiked}
+              onLikeUpdate={handleLikeUpdate}
             />
-            <p className="ml-2">{formatNumber(likesCount)}</p>
+            <p className="ml-2">{formatNumber(likeState.likesCount)}</p>
           </div>
         </div>
         <div className="flex gap-2 sm:gap-4 items-center">

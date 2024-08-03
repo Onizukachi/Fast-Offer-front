@@ -16,6 +16,7 @@ import { Button } from "@nextui-org/react";
 import AuthContext from "@context/AuthContext";
 import AuthorInfo from "@components/AuthorInfo";
 import ActionMenu from "@components/ActionMenu";
+import useLikeState from "@utils/useLikeState";
 
 const Comment = ({
   comment,
@@ -24,23 +25,19 @@ const Comment = ({
   onDeleteComment,
 }) => {
   const { user } = useContext(AuthContext);
-  const [likesCount, setLikesCount] = useState(comment.likes_count);
+  const [likeState, handleLikeUpdate] = useLikeState(comment);
   const [showInput, setShowInput] = useState(false);
   const [newCommentBody, setNewCommentBody] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editedBody, setEditedBody] = useState(comment.body);
   const [createErrors, setCreateErrors] = useState([]);
   const [updateErrors, setUpdateErrors] = useState([]);
-
   const author = comment.author.data.attributes;
 
   useEffect(() => {
     setEditedBody(comment.body);
   }, [comment.body]);
 
-  useEffect(() => {
-    setLikesCount(comment.likes_count);
-  }, [comment.likes_count]);
 
   const createCommentMutation = useMutation({
     mutationFn: () => createCommentQuery(comment.id, "Comment", newCommentBody),
@@ -187,16 +184,16 @@ const Comment = ({
             </div>
             <div className="flex px-3 py-2">
               <LikeButton
-                setLikesCount={setLikesCount}
-                initState={comment.liked}
                 likeableId={comment.id}
-                likeableType={"Comment"}
+                likeableType="Comment"
+                isLiked={likeState.isLiked}
+                onLikeUpdate={handleLikeUpdate}
               />
               <p className="ml-2">
                 {new Intl.NumberFormat("ru", {
                   notation: "compact",
                   maximumFractionDigits: 1,
-                }).format(likesCount)}
+                }).format(likeState.likesCount)}
               </p>
             </div>
           </div>

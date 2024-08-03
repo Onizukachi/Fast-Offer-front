@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import AuthContext from "@context/AuthContext.jsx";
 import { showToast } from "@utils/toast.js";
 import { UNATHORIZED } from "@constants/toastMessages.js";
@@ -6,20 +6,12 @@ import { useMutation } from "react-query";
 import PropTypes from "prop-types";
 import { likeQuery, unLikeQuery } from "./queries.js";
 
-const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
+const LikeButton = ({ likeableId, likeableType, isLiked, onLikeUpdate }) => {
   const { user } = useContext(AuthContext);
-  const [isLiked, setIsLiked] = useState(initState);
-
-  useEffect(() => {
-    setIsLiked(initState);
-  }, [initState]);
 
   const likeMutation = useMutation({
     mutationFn: () => likeQuery(likeableId, likeableType),
-    onSuccess: () => {
-      setIsLiked(true);
-      setLikesCount((prev) => prev + 1);
-    },
+    onSuccess: () => {onLikeUpdate(true, 1)},
     onError: (error) => {
       console.log(error.response.data);
     },
@@ -27,10 +19,7 @@ const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
 
   const unLikeMutation = useMutation({
     mutationFn: () => unLikeQuery(likeableId, likeableType),
-    onSuccess: () => {
-      setIsLiked(false);
-      setLikesCount((prev) => prev - 1);
-    },
+    onSuccess: () => {onLikeUpdate(false, -1)},
     onError: (error) => {
       console.log(error.response.data);
     },
@@ -51,7 +40,7 @@ const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
 
   return (
     <div>
-      <button className="" onClick={handleLike}>
+      <button onClick={handleLike}>
         {isLiked ? "❤️" : "🤍"}
       </button>
     </div>
@@ -59,8 +48,9 @@ const LikeButton = ({ likeableId, likeableType, setLikesCount, initState }) => {
 };
 
 LikeButton.propTypes = {
-  setLikesCount: PropTypes.func,
-  initState: PropTypes.bool,
+  onLikeUpdate: PropTypes.func,
+  isLiked: PropTypes.bool,
+  likesCount: PropTypes.number,
   likeableId: PropTypes.any,
   likeableType: PropTypes.string,
 };
