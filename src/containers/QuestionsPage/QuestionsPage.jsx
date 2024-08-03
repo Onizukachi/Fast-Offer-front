@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import {useState, useCallback, useRef, useEffect} from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { questionsQuery } from "./queries";
 import Question from "@components/Question";
 import { deserialize } from "deserialize-json-api";
@@ -24,79 +24,34 @@ const ORDER_OPTIONS = [
   { key: "asc", label: "По убыванию" },
 ];
 
+const mergeQueryParams = (params) => ({
+  searchTerm: params.get("q") || "",
+  selectedGradeId: params.get("grade_id") || null,
+  selectedPositionIds:
+    params
+      .get("position_ids")
+      ?.split(",")
+      ?.filter((el) => el !== "") || [],
+  sortBy: SORT_FIELDS.includes(params.get("sort")) ? params.get("sort") : "",
+  sortOrder: ORDER_OPTIONS.map((el) => el.key).includes(params.get("order"))
+    ? params.get("order")
+    : "asc",
+  selectedTag: params.get("tag") || null,
+});
+
 const QuestionsPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [questionsData, setQuestionsData] = useState([]);
   const [positions, setPositions] = useState([]);
   const [grades, setGrades] = useState([]);
-  // const [filters, setFilters] = useState({
-  //   searchTerm: searchParams.get('q') || '',
-  //   selectedGradeId: searchParams.get('grade_id') || null,
-  //   selectedPositionIds: searchParams.getAll('position_ids') || [],
-  //   sortBy: searchParams.get('sort') || '',
-  //   sortOrder: searchParams.get('order') || 'asc',
-  //   selectedTag: searchParams.get('tag') || null,
-  // });
-
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-  const [selectedGradeId, setSelectedGradeId] = useState(
-    searchParams.get("grade_id"),
-  );
-  const [selectedPositionIds, setSelectedPositionIds] = useState(
-    searchParams.getAll("position_ids") || [],
-  );
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "");
-  const [sortOrder, setSortOrder] = useState(
-    searchParams.get("order") || "asc",
-  );
-  const [selectedTag, setSelectedTag] = useState(searchParams.get("tag"));
+  const [filters, setFilters] = useState(mergeQueryParams(searchParams));
   const hasMoreRef = useRef(false);
   const cursorRef = useRef(null);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("grade_id")) {
-      setSelectedGradeId(searchParams.get("grade_id"));
-    } else {
-      setSelectedGradeId(null);
-    }
-
-    if (searchParams.get("position_ids")) {
-      setSelectedPositionIds(searchParams.get("position_ids").split(","));
-    } else {
-      setSelectedPositionIds([]);
-    }
-
-    if (searchParams.get("q")) {
-      setSearchTerm(searchParams.get("q"));
-    } else {
-      setSearchTerm("");
-    }
-
-    if (
-      searchParams.get("sort") &&
-      SORT_FIELDS.includes(searchParams.get("sort"))
-    ) {
-      setSortBy(searchParams.get("sort"));
-    } else {
-      setSortBy("");
-    }
-
-    if (
-      searchParams.get("order") &&
-      ORDER_OPTIONS.map((el) => el.key).includes(searchParams.get("order"))
-    ) {
-      setSortOrder(searchParams.get("order"));
-    } else {
-      setSortOrder("asc");
-    }
-
-    if (searchParams.get("tag")) {
-      setSelectedTag(searchParams.get("tag"));
-    } else {
-      setSelectedTag(null);
-    }
+    setFilters(mergeQueryParams(searchParams));
   }, [searchParams]);
 
   const toggleFilters = () => setShowFilters(!showFilters);
@@ -131,7 +86,7 @@ const QuestionsPage = () => {
       resetMeta();
       setSearchParams(
         (prev) => {
-          if (gradeId !== selectedGradeId) {
+          if (gradeId !== filters.selectedGradeId) {
             prev.set("grade_id", gradeId);
           } else {
             prev.delete("grade_id");
@@ -142,7 +97,7 @@ const QuestionsPage = () => {
         { replace: true },
       );
     },
-    [searchParams, selectedGradeId],
+    [searchParams, filters.selectedGradeId],
   );
 
   const handleTagClick = useCallback(
@@ -150,7 +105,7 @@ const QuestionsPage = () => {
       resetMeta();
       setSearchParams(
         (prev) => {
-          if (tag !== selectedTag) {
+          if (tag !== filters.selectedTag) {
             prev.set("tag", tag);
           } else {
             prev.delete("tag");
@@ -161,7 +116,7 @@ const QuestionsPage = () => {
         { replace: true },
       );
     },
-    [searchParams, selectedTag],
+    [searchParams, filters.selectedTag],
   );
 
   const handlePositionsChange = useCallback(
@@ -190,7 +145,10 @@ const QuestionsPage = () => {
       resetMeta();
       setSearchParams(
         (prev) => {
-          if (!direction || (sortBy === field && sortOrder === direction)) {
+          if (
+            !direction ||
+            (filters.sortBy === field && filters.sortOrder === direction)
+          ) {
             prev.delete("sort");
             prev.delete("order");
           } else {
@@ -203,29 +161,22 @@ const QuestionsPage = () => {
         { replace: true },
       );
     },
-    [searchParams, sortBy, sortOrder],
+    [searchParams, filters.sortBy, filters.sortOrder],
   );
 
   const queryParams = {
     after: cursorRef.current,
     limit: LIMIT_PER_PAGE,
-    query: searchTerm,
-    grade_id: selectedGradeId,
-    position_ids: selectedPositionIds,
-    sort: sortBy,
-    order: sortOrder,
-    tag: selectedTag,
+    query: filters.searchTerm,
+    grade_id: filters.selectedGradeId,
+    position_ids: filters.selectedPositionIds,
+    sort: filters.sortBy,
+    order: filters.sortOrder,
+    tag: filters.selectedTag,
   };
 
   const { isLoading, refetch } = useQuery(
-    [
-      searchTerm,
-      selectedGradeId,
-      selectedPositionIds,
-      sortBy,
-      sortOrder,
-      selectedTag,
-    ],
+    [filters],
     () =>
       questionsQuery(queryParams)
         .then((data) => {
@@ -289,17 +240,17 @@ const QuestionsPage = () => {
         <div className="flex flex-wrap gap-6 justify-center mt-3">
           <FiltersBlock
             isLoading={isLoading}
-            selectedGradeId={selectedGradeId}
+            selectedGradeId={filters.selectedGradeId}
             handleGradeChange={handleGradeChange}
             grades={grades}
-            selectedPositionIds={selectedPositionIds}
+            selectedPositionIds={filters.selectedPositionIds}
             handlePositionsChange={handlePositionsChange}
             positions={positions}
           />
           <Orders
             isLoading={isLoading}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
+            sortBy={filters.sortBy}
+            sortOrder={filters.sortOrder}
             handleSortingChange={handleSortingChange}
           />
         </div>
