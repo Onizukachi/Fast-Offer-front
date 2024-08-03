@@ -1,5 +1,5 @@
 import "./Answer.module.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { BiSolidCommentDetail } from "react-icons/bi";
 import LikeButton from "@components/LikeButton";

@@ -20,7 +20,7 @@ const FiltersBlock = ({
         placeholder="Выберите уровень"
         className="max-w-56"
         disableSelectorIconRotation
-        onChange={handleGradeChange}
+        onChange={(e) => handleGradeChange(e.target.value)}
       >
         {grades.map((grade) => (
           <SelectItem key={grade.id}>{grade.grade}</SelectItem>

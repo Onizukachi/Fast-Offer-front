@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import ActionMenu from "@components/ActionMenu";
 import useLikeState from "@utils/useLikeState";
 
-const Question = ({ question, refetch }) => {
+const Question = ({ question, refetch, handleTagClick, handleGradeClick }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { author, positions, tags } = question;
@@ -115,7 +115,7 @@ const Question = ({ question, refetch }) => {
           </Chip>
           {tags.map((tag) => {
             return (
-              <Chip key={tag.id} size="sm" className="cursor-pointer">
+              <Chip key={tag.id} onClick={() => handleTagClick(tag.name)} size="sm" className="cursor-pointer">
                 {tag.name}
               </Chip>
             );
@@ -129,6 +129,8 @@ const Question = ({ question, refetch }) => {
 Question.propTypes = {
   question: PropTypes.object,
   refetch: PropTypes.func,
+  handleTagClick: PropTypes.func,
+  handleGradeClick: PropTypes.func
 };
 
 export default Question;

@@ -30,17 +30,27 @@ const QuestionsPage = () => {
   const [questionsData, setQuestionsData] = useState([]);
   const [positions, setPositions] = useState([]);
   const [grades, setGrades] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-    const [selectedGradeId, setSelectedGradeId] = useState(
-      searchParams.get("grade_id"),
-    );
-    const [selectedPositionIds, setSelectedPositionIds] = useState(
-      searchParams.getAll("position_ids") || [],
-    );
-    const [sortBy, setSortBy] = useState(searchParams.get("sort") || "");
-    const [sortOrder, setSortOrder] = useState(
-      searchParams.get("order") || "asc",
+  // const [filters, setFilters] = useState({
+  //   searchTerm: searchParams.get('q') || '',
+  //   selectedGradeId: searchParams.get('grade_id') || null,
+  //   selectedPositionIds: searchParams.getAll('position_ids') || [],
+  //   sortBy: searchParams.get('sort') || '',
+  //   sortOrder: searchParams.get('order') || 'asc',
+  //   selectedTag: searchParams.get('tag') || null,
+  // });
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  const [selectedGradeId, setSelectedGradeId] = useState(
+    searchParams.get("grade_id"),
   );
+  const [selectedPositionIds, setSelectedPositionIds] = useState(
+    searchParams.getAll("position_ids") || [],
+  );
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "");
+  const [sortOrder, setSortOrder] = useState(
+    searchParams.get("order") || "asc",
+  );
+  const [selectedTag, setSelectedTag] = useState(searchParams.get("tag"));
   const hasMoreRef = useRef(false);
   const cursorRef = useRef(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -81,6 +91,12 @@ const QuestionsPage = () => {
     } else {
       setSortOrder("asc");
     }
+
+    if (searchParams.get("tag")) {
+      setSelectedTag(searchParams.get("tag"));
+    } else {
+      setSelectedTag(null);
+    }
   }, [searchParams]);
 
   const toggleFilters = () => setShowFilters(!showFilters);
@@ -88,6 +104,7 @@ const QuestionsPage = () => {
   const resetMeta = useCallback(() => {
     setQuestionsData([]);
     cursorRef.current = null;
+    hasMoreRef.current = false;
   });
 
   const cleanRefetch = useCallback(() => {
@@ -109,37 +126,85 @@ const QuestionsPage = () => {
     [searchParams],
   );
 
-  const handleSearchInputChange = (searchTerm) => {
-    handleSearch(searchTerm);
-  };
+  const handleGradeChange = useCallback(
+    (gradeId) => {
+      resetMeta();
+      setSearchParams(
+        (prev) => {
+          if (gradeId !== selectedGradeId) {
+            prev.set("grade_id", gradeId);
+          } else {
+            prev.delete("grade_id");
+          }
 
-  const handleGradeChange = useCallback((e) => {
-    resetMeta();
-    setSearchParams(
-      (prev) => {
-        prev.set("grade_id", e.target.value);
-        return prev;
-      },
-      { replace: true },
-    );
-  }, [searchParams]);
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [searchParams, selectedGradeId],
+  );
 
-  const handlePositionsChange = useCallback((positionIds) => {
-    resetMeta();
-    setSearchParams(
-      (prev) => {
-        prev.set(
-          "position_ids",
-          Array.from(positionIds)
-            .map((el) => Number(el))
-            .filter((el) => el !== 0)
-            .join(","),
-        );
-        return prev;
-      },
-      { replace: true },
-    );
-  }, [searchParams]);
+  const handleTagClick = useCallback(
+    (tag) => {
+      resetMeta();
+      setSearchParams(
+        (prev) => {
+          if (tag !== selectedTag) {
+            prev.set("tag", tag);
+          } else {
+            prev.delete("tag");
+          }
+
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [searchParams, selectedTag],
+  );
+
+  const handlePositionsChange = useCallback(
+    (positionIds) => {
+      resetMeta();
+      setSearchParams(
+        (prev) => {
+          prev.set(
+            "position_ids",
+            Array.from(positionIds)
+              .map((el) => Number(el))
+              .filter((el) => el !== 0)
+              .join(","),
+          );
+
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [searchParams],
+  );
+
+  const handleSortingChange = useCallback(
+    (field, direction) => {
+      resetMeta();
+      setSearchParams(
+        (prev) => {
+          if (!direction || (sortBy === field && sortOrder === direction)) {
+            prev.delete("sort");
+            prev.delete("order");
+          } else {
+            prev.set("sort", field);
+            prev.set("order", direction);
+          }
+
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [searchParams, sortBy, sortOrder],
+  );
 
   const queryParams = {
     after: cursorRef.current,
@@ -149,10 +214,18 @@ const QuestionsPage = () => {
     position_ids: selectedPositionIds,
     sort: sortBy,
     order: sortOrder,
+    tag: selectedTag,
   };
 
   const { isLoading, refetch } = useQuery(
-    [searchTerm, selectedGradeId, selectedPositionIds, sortBy, sortOrder],
+    [
+      searchTerm,
+      selectedGradeId,
+      selectedPositionIds,
+      sortBy,
+      sortOrder,
+      selectedTag,
+    ],
     () =>
       questionsQuery(queryParams)
         .then((data) => {
@@ -187,29 +260,6 @@ const QuestionsPage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
-  const handleSortingChange = useCallback((field, direction) => {
-    resetMeta();
-    if (sortBy === field && direction === sortOrder) {
-      setSearchParams(
-        (prev) => {
-          prev.set("sort", "");
-          prev.set("order", "asc");
-          return prev;
-        },
-        { replace: true },
-      );
-    } else {
-      setSearchParams(
-        (prev) => {
-          prev.set("sort", field);
-          prev.set("order", direction);
-          return prev;
-        },
-        { replace: true },
-      );
-    }
-  }, [searchParams]);
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-center flex-wrap gap-6">
@@ -219,7 +269,7 @@ const QuestionsPage = () => {
             isDisabled={isLoading}
             type="search"
             size="lg"
-            onValueChange={handleSearchInputChange}
+            onValueChange={handleSearch}
             placeholder="Поиск по вопросам"
             startContent={
               <IoSearchOutline className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
@@ -253,7 +303,7 @@ const QuestionsPage = () => {
             handleSortingChange={handleSortingChange}
           />
         </div>
-       )}
+      )}
       <InfiniteScroll
         dataLength={questionsData.length}
         next={refetch}
@@ -272,6 +322,8 @@ const QuestionsPage = () => {
               key={question.id}
               question={question}
               refetch={cleanRefetch}
+              handleTagClick={handleTagClick}
+              handleGradeClick={handleGradeChange}
             />
           );
         })}

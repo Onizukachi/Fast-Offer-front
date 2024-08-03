@@ -12,8 +12,8 @@ const Orders = ({isLoading, sortBy, sortOrder, handleSortingChange}) => {
       <Select
         isDisabled={isLoading}
         label="Сортировать по дате"
-        defaultSelectedKeys={[sortBy === "created_at" && sortOrder]}
-        selectedKeys={[sortBy === "created_at" && sortOrder]}
+        defaultSelectedKeys={sortBy === "created_at" ? [sortOrder] : []}
+        selectedKeys={sortBy === "created_at" ? [sortOrder] : []}
         labelPlacement="outside"
         placeholder="Направление"
         className="max-w-44"
@@ -27,8 +27,8 @@ const Orders = ({isLoading, sortBy, sortOrder, handleSortingChange}) => {
       <Select
         isDisabled={isLoading}
         label="Сортировать по популярности"
-        selectedKeys={[sortBy === "answers_count" && sortOrder]}
-        defaultSelectedKeys={[sortBy === "answers_count" && sortOrder]}
+        selectedKeys={sortBy === "answers_count" ? [sortOrder] : []}
+        defaultSelectedKeys={sortBy === "answers_count" ? [sortOrder] : []}
         labelPlacement="outside"
         placeholder="Направление"
         className="max-w-56"
