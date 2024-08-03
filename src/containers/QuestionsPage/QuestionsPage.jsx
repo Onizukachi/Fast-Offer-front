@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import {useState, useCallback, useRef, useEffect, useMemo} from "react";
+import {useState, useCallback, useRef, useEffect} from "react";
 import { questionsQuery } from "./queries";
 import Question from "@components/Question";
 import { deserialize } from "deserialize-json-api";
@@ -18,7 +18,7 @@ import FiltersBlock from "@components/Questions/FiltersBlock";
 import Orders from "@components/Questions/Orders/Orders.jsx";
 
 const LIMIT_PER_PAGE = 10;
-const SORT_FIELDS = ["date", "popular"];
+const SORT_FIELDS = ["created_at", "answers_count"];
 const ORDER_OPTIONS = [
   { key: "desc", label: "По возрастанию" },
   { key: "asc", label: "По убыванию" },
@@ -30,16 +30,16 @@ const QuestionsPage = () => {
   const [questionsData, setQuestionsData] = useState([]);
   const [positions, setPositions] = useState([]);
   const [grades, setGrades] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-  const [selectedGradeId, setSelectedGradeId] = useState(
-    searchParams.get("grade_id"),
-  );
-  const [selectedPositionIds, setSelectedPositionIds] = useState(
-    searchParams.getAll("position_ids") || [],
-  );
-  const [sortField, setSortField] = useState(searchParams.get("sort") || "");
-  const [sortOrder, setSortOrder] = useState(
-    searchParams.get("order") || "asc",
+    const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+    const [selectedGradeId, setSelectedGradeId] = useState(
+      searchParams.get("grade_id"),
+    );
+    const [selectedPositionIds, setSelectedPositionIds] = useState(
+      searchParams.getAll("position_ids") || [],
+    );
+    const [sortBy, setSortBy] = useState(searchParams.get("sort") || "");
+    const [sortOrder, setSortOrder] = useState(
+      searchParams.get("order") || "asc",
   );
   const hasMoreRef = useRef(false);
   const cursorRef = useRef(null);
@@ -68,9 +68,9 @@ const QuestionsPage = () => {
       searchParams.get("sort") &&
       SORT_FIELDS.includes(searchParams.get("sort"))
     ) {
-      setSortField(searchParams.get("sort"));
+      setSortBy(searchParams.get("sort"));
     } else {
-      setSortField("");
+      setSortBy("");
     }
 
     if (
@@ -141,18 +141,18 @@ const QuestionsPage = () => {
     );
   }, [searchParams]);
 
-  const queryParams = useMemo(() => ({
+  const queryParams = {
     after: cursorRef.current,
     limit: LIMIT_PER_PAGE,
     query: searchTerm,
     grade_id: selectedGradeId,
     position_ids: selectedPositionIds,
-    sort: sortField,
+    sort: sortBy,
     order: sortOrder,
-  }), [searchTerm, selectedGradeId, selectedPositionIds, sortField, sortOrder]);
+  };
 
   const { isLoading, refetch } = useQuery(
-    [searchTerm, selectedGradeId, selectedPositionIds, sortField, sortOrder],
+    [searchTerm, selectedGradeId, selectedPositionIds, sortBy, sortOrder],
     () =>
       questionsQuery(queryParams)
         .then((data) => {
@@ -189,7 +189,7 @@ const QuestionsPage = () => {
 
   const handleSortingChange = useCallback((field, direction) => {
     resetMeta();
-    if (sortField === field && direction === sortOrder) {
+    if (sortBy === field && direction === sortOrder) {
       setSearchParams(
         (prev) => {
           prev.set("sort", "");
@@ -209,8 +209,6 @@ const QuestionsPage = () => {
       );
     }
   }, [searchParams]);
-
-  console.log("SEXXX")
 
   return (
     <div className="flex flex-col gap-4">
@@ -250,7 +248,7 @@ const QuestionsPage = () => {
           />
           <Orders
             isLoading={isLoading}
-            sortField={sortField}
+            sortBy={sortBy}
             sortOrder={sortOrder}
             handleSortingChange={handleSortingChange}
           />

@@ -6,19 +6,19 @@ const ORDER_OPTIONS = [
   { key: "asc", label: "По убыванию" },
 ];
 
-const Orders = ({isLoading, sortField, sortOrder, handleSortingChange}) => {
+const Orders = ({isLoading, sortBy, sortOrder, handleSortingChange}) => {
   return (
     <>
       <Select
         isDisabled={isLoading}
         label="Сортировать по дате"
-        defaultSelectedKeys={[sortField === "date" && sortOrder]}
-        selectedKeys={[sortField === "date" && sortOrder]}
+        defaultSelectedKeys={[sortBy === "created_at" && sortOrder]}
+        selectedKeys={[sortBy === "created_at" && sortOrder]}
         labelPlacement="outside"
         placeholder="Направление"
         className="max-w-44"
         disableSelectorIconRotation
-        onChange={(e) => handleSortingChange("date", e.target.value)}
+        onChange={(e) => handleSortingChange("created_at", e.target.value)}
       >
         {ORDER_OPTIONS.map((option) => (
           <SelectItem key={option.key}>{option.label}</SelectItem>
@@ -27,13 +27,13 @@ const Orders = ({isLoading, sortField, sortOrder, handleSortingChange}) => {
       <Select
         isDisabled={isLoading}
         label="Сортировать по популярности"
-        selectedKeys={[sortField === "popular" && sortOrder]}
-        defaultSelectedKeys={[sortField === "popular" && sortOrder]}
+        selectedKeys={[sortBy === "answers_count" && sortOrder]}
+        defaultSelectedKeys={[sortBy === "answers_count" && sortOrder]}
         labelPlacement="outside"
         placeholder="Направление"
         className="max-w-56"
         disableSelectorIconRotation
-        onChange={(e) => handleSortingChange("popular", e.target.value)}
+        onChange={(e) => handleSortingChange("answers_count", e.target.value)}
       >
         {ORDER_OPTIONS.map((option) => (
           <SelectItem key={option.key}>{option.label}</SelectItem>
@@ -45,7 +45,7 @@ const Orders = ({isLoading, sortField, sortOrder, handleSortingChange}) => {
 
 Orders.propTypes = {
   isLoading: PropTypes.bool,
-  sortField: PropTypes.string,
+  sortBy: PropTypes.string,
   sortOrder: PropTypes.string,
   handleSortingChange: PropTypes.func,
 };
