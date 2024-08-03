@@ -2,24 +2,25 @@ import "./Answer.module.css";
 import { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { BiSolidCommentDetail } from "react-icons/bi";
-import LikeButton from "@components/LikeButton/index.js";
+import LikeButton from "@components/LikeButton";
 import moment from "moment/min/moment-with-locales";
-import { normalizeCountForm } from "@utils/normalizeCountForm.js";
-import Comment from "@components/Comment/index.js";
-import { commentsQuery, deleteAnswerQuery } from "./queries.js";
+import { normalizeCountForm } from "@utils/normalizeCountForm";
+import Comment from "@components/Comment";
+import { commentsQuery, deleteAnswerQuery } from "./queries";
 import { useMutation, useQuery } from "react-query";
-import { createCommentQuery } from "@components/Comment/queries.js";
-import { showToast } from "@utils/toast.js";
+import { createCommentQuery } from "@components/Comment/queries";
+import { showToast } from "@utils/toast";
 import { Textarea } from "@nextui-org/input";
 import { Button } from "@nextui-org/react";
-import useCommentTree from "@utils/useCommentTree.js";
-import AuthContext from "@context/AuthContext.jsx";
-import AuthorInfo from "@components/AuthorInfo/index.js";
-import ActionMenu from "@components/ActionMenu/index.js";
+import useCommentTree from "@utils/useCommentTree";
+import AuthContext from "@context/AuthContext";
+import AuthorInfo from "@components/AuthorInfo";
+import ActionMenu from "@components/ActionMenu";
+import useLikeState from "@utils/useLikeState";
 
 const Answer = ({ answer, questionId, onDelete }) => {
   const { user } = useContext(AuthContext);
-  const [likesCount, setLikesCount] = useState(answer.likes_count);
+  const [likeState, handleLikeUpdate] = useLikeState(answer);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [newCommentBody, setNewCommentBody] = useState("");
@@ -48,10 +49,6 @@ const Answer = ({ answer, questionId, onDelete }) => {
     recurse(rootObjects);
     return count;
   };
-
-  useEffect(() => {
-    setLikesCount(answer.likes_count);
-  }, [answer.likes_count]);
 
   useQuery(
     `comments-${answer.id}`,
@@ -142,16 +139,16 @@ const Answer = ({ answer, questionId, onDelete }) => {
           </div>
           <div className="flex px-3 py-2">
             <LikeButton
-              setLikesCount={setLikesCount}
-              initState={answer.liked}
               likeableId={answer.id}
-              likeableType={"Answer"}
+              likeableType="Answer"
+              isLiked={likeState.isLiked}
+              onLikeUpdate={handleLikeUpdate}
             />
             <p className="ml-2">
               {new Intl.NumberFormat("ru", {
                 notation: "compact",
                 maximumFractionDigits: 1,
-              }).format(likesCount)}
+              }).format(likeState.likesCount)}
             </p>
           </div>
         </div>
