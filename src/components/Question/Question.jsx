@@ -16,8 +16,9 @@ import { showToast } from "@utils/toast.js";
 import { useNavigate } from "react-router-dom";
 import ActionMenu from "@components/ActionMenu";
 import useLikeState from "@utils/useLikeState";
+import Favorite from "@components/Favorite";
 
-const Question = ({ question, refetch, handleTagClick, handleGradeClick }) => {
+const Question = ({ question, refetch, handleTagClick }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { author, positions, tags } = question;
@@ -100,6 +101,7 @@ const Question = ({ question, refetch, handleTagClick, handleGradeClick }) => {
             />
             <p className="ml-2">{formatNumber(likeState.likesCount)}</p>
           </div>
+          <Favorite question={question} />
         </div>
         <div className="flex gap-2 sm:gap-4 items-center">
           <AuthorInfo author={author} />
