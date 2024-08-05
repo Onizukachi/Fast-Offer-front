@@ -14,6 +14,7 @@ const Favorite = ({ question }) => {
   const favoriteMutation = useMutation({
     mutationFn: () => favoriteQuery(question.id),
     onSuccess: () => {
+      showToast("Вопрос добавлен в избранное")
       setIsFavorite(true);
     },
     onError: (error) => {
@@ -24,6 +25,7 @@ const Favorite = ({ question }) => {
   const unFavoriteMutation = useMutation({
     mutationFn: () => unFavoriteQuery(question.id),
     onSuccess: () => {
+      showToast("Вопрос удален из избранного")
       setIsFavorite(false);
     },
     onError: (error) => {
