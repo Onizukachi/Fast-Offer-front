@@ -2,11 +2,15 @@ import styles from "./HomePage.module.css";
 import { useState } from 'react'
 import { useQuery } from "react-query";
 import { positionsQuery } from "./queries";
-import { NavLink } from "react-router-dom";
 import { Spinner } from "@nextui-org/react";
 import { deserialize } from "deserialize-json-api";
+import { useDispatch } from "react-redux";
+import { rememberPosition } from "@store/actions";
+import {useNavigate} from "react-router-dom";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [positions, setPositions] = useState([])
 
   const { isSuccess, isLoading } = useQuery(
@@ -19,27 +23,29 @@ const HomePage = () => {
     { refetchInterval: false, refetchOnWindowFocus: false },
   );
 
+  const handleClick = (id) => {
+    dispatch(rememberPosition(id));
+    const params = new URLSearchParams({position_ids: id});
+    navigate(`/questions?${params.toString()}`, { replace: false });
+  }
+
   return (
     <div className="flex flex-wrap gap-12 justify-between">
       {isLoading && <Spinner size="lg" color="primary" />}
       {isSuccess &&
         positions.map((el) => {
           return (
-            <div key={el.id} className="flex items-center">
-              <NavLink to="/">
+            <button key={el.id} onClick={() => handleClick(el.id)}  className="flex items-center">
                 <img
                   className={styles.logo}
                   src={el.image_url}
                   alt={el.title}
                 ></img>
-              </NavLink>
 
-              <NavLink to="/">
                 <h4 className="font-bold text-large hover:opacity-80">
                   {el.title}
                 </h4>
-              </NavLink>
-            </div>
+            </button>
           );
         })}
     </div>

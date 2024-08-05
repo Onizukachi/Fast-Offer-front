@@ -11,13 +11,24 @@ import {
   NavbarItem,
   Link,
 } from "@nextui-org/react";
+import queryString from "query-string";
 import imgLogo from "./img/logo.svg";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const storedPositionId = useSelector((state) => state.positionReducer);
   const currLocation = useLocation().pathname.split("/")[1];
   const menuItems = ["Вопросы", "Собесы", "Избранное"];
+
+  const makeQuestionsPageLink = () => {
+    if (!storedPositionId) return `/questions`;
+
+    const queryParams = queryString.stringify({
+      position_ids: storedPositionId,
+    });
+    return `/questions?${queryParams}`;
+  };
 
   return (
     <Navbar
@@ -72,7 +83,7 @@ const Header = () => {
         <NavbarItem isActive={currLocation === "questions"}>
           <Link
             color={currLocation === "questions" ? "primary" : "foreground"}
-            href="/questions"
+            href={makeQuestionsPageLink()}
           >
             Вопросы
           </Link>
